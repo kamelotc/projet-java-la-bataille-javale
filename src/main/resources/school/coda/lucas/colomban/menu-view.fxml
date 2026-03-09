@@ -6,11 +6,15 @@
 
 <?import javafx.scene.control.Button?>
 <VBox alignment="CENTER" spacing="20.0" xmlns:fx="http://javafx.com/fxml"
-      fx:controller="school.coda.lucas.colomban.fxml.projetjavalabataillejavale.HelloController">
+      fx:controller="school.coda.lucas.colomban.controller.MenuController">
     <padding>
         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
     </padding>
 
+    <Label text="LA BATAILLE JAVALE" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: blue;"/>
     <Label fx:id="welcomeText"/>
-    <Button text="Hello!" onAction="#onHelloButtonClick"/>
+    <Button text="Jouer" onAction="#onJouerButtonClick"/>
+    <Button text="Achievement" onAction="#onAchievementButtonClick" disable="true"/>
+    <Button text="Crédits" onAction="#onCreditsButtonClick"/>
+
 </VBox>
