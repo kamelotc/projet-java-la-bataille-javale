@@ -13,10 +13,10 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 
-import school.coda.lucas.colomban.fxml.projetjavalabataillejavale.modele.Bateau;
-import school.coda.lucas.colomban.fxml.projetjavalabataillejavale.modele.Grille;
-import school.coda.lucas.colomban.fxml.projetjavalabataillejavale.modele.Orientation;
-import school.coda.lucas.colomban.fxml.projetjavalabataillejavale.modele.TypeBateau;
+import school.coda.lucas.colomban.modele.Bateau;
+import school.coda.lucas.colomban.modele.Grille;
+import school.coda.lucas.colomban.modele.Orientation;
+import school.coda.lucas.colomban.modele.TypeBateau;
 
 import java.util.ArrayList;
 import java.util.List;

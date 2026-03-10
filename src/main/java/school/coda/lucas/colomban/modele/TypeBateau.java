@@ -1,4 +1,4 @@
-package school.coda.lucas.colomban.fxml.projetjavalabataillejavale.modele;
+package school.coda.lucas.colomban.modele;
 
 public enum TypeBateau {
     PORTE_AVIONS("Porte-avions",5),

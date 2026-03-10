@@ -1,4 +1,4 @@
-package school.coda.lucas.colomban.fxml.projetjavalabataillejavale.modele;
+package school.coda.lucas.colomban.modele;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -99,10 +99,10 @@ public class Grille {
             }
         }
 
-        // Si on arrive ici, c'est que toutes les cases sont dans la grille et libres !
+
         return true;
     }
-    // Getter pour récupérer la liste des bateaux placés
+
     public List<Bateau> getListeBateaux() {
         return listeBateaux;
     }

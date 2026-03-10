@@ -1,4 +1,4 @@
-package school.coda.lucas.colomban.fxml.projetjavalabataillejavale.modele;
+package school.coda.lucas.colomban.modele;
 
 public class Bateau {
     private TypeBateau type;
