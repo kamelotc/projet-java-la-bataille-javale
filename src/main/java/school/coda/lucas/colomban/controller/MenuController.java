@@ -53,7 +53,7 @@ public class MenuController {
             stage.setTitle("Bataille Javale");
 
         } catch (IOException e) {
-            System.out.println("Oups, impossible de charger la page des crédits !");
+            System.out.println("Impossible de charger la page");
             e.printStackTrace();
         }
     }

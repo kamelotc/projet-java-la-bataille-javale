@@ -4,7 +4,7 @@ import javafx.application.Application;
 import modele.Bateau;
 import modele.Orientation;
 import modele.TypeBateau;
-import school.coda.lucas.colomban.fxml.projetjavalabataillejavale.modele.Grille;
+import school.coda.lucas.colomban.modele.Grille;
 
 public class Launcher {
     public static void main(String[] args) {
