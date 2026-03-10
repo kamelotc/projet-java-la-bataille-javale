@@ -7,36 +7,55 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.stage.Stage;
+import school.coda.lucas.colomban.CanvasApplication;
 import school.coda.lucas.colomban.Main;
-
 
 import java.io.IOException;
 
+
 public class MenuController {
+
+
 
     @FXML
     private Label welcomeText;
 
     @FXML
-    protected void onJouerButtonClick(ActionEvent event) throws IOException {
+    protected void onJouerButtonClick(ActionEvent event) {
+        Stage nouvelleFenetre = new Stage();
 
-        FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("game-view.fxml"));
-        Scene scene = new Scene(fxmlLoader.load(), 800, 600);
+        nouvelleFenetre.setWidth(400);
+        nouvelleFenetre.setHeight(400);
 
-        Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+        nouvelleFenetre.setMinWidth(400);
+        nouvelleFenetre.setMinHeight(400);
 
-        stage.setTitle("Bataille Javale - En jeu");
-        stage.setScene(scene);
+        CanvasApplication monJeu = new CanvasApplication();
+        monJeu.start(nouvelleFenetre);
 
+        Stage menu = (Stage) ((Node) event.getSource()).getScene().getWindow();
+        menu.close();
     }
-
     @FXML
     protected void onAchievementButtonClick() {
     }
 
     @FXML
-    protected void onCreditsButtonClick() {
-        welcomeText.setText("Créé par Lucas et Colomban");
+    protected void onCreditsButtonClick(ActionEvent event) {
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("credits-view.fxml"));
+
+            Scene sceneCredits = new Scene(fxmlLoader.load(), 400, 400);
+
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+
+            stage.setScene(sceneCredits);
+            stage.setTitle("Bataille Javale");
+
+        } catch (IOException e) {
+            System.out.println("Oups, impossible de charger la page des crédits !");
+            e.printStackTrace();
+        }
     }
 }
 

@@ -71,7 +71,7 @@ public class CanvasApplication extends Application {
         // La scène est un peu plus grande pour tout contenir
         Scene scene = new Scene(root, 400, 400, Color.WHITE);
 
-        stage.setTitle("Bataille Navale - Grille");
+        stage.setTitle("Bataille Navale");
         stage.setScene(scene);
         stage.show();
     }

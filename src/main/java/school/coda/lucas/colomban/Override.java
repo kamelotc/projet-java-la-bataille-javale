@@ -1,4 +1,4 @@
-package school.coda.lucas.colomban.fxml.projetjavalabataillejavale;
+package school.coda.lucas.colomban;
 
 public @interface Override {
 }
