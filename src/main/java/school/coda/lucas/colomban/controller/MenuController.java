@@ -24,11 +24,11 @@ public class MenuController {
     protected void onJouerButtonClick(ActionEvent event) {
         Stage nouvelleFenetre = new Stage();
 
-        nouvelleFenetre.setWidth(400);
-        nouvelleFenetre.setHeight(400);
+        nouvelleFenetre.setWidth(600);
+        nouvelleFenetre.setHeight(600);
 
-        nouvelleFenetre.setMinWidth(400);
-        nouvelleFenetre.setMinHeight(400);
+        nouvelleFenetre.setMinWidth(600);
+        nouvelleFenetre.setMinHeight(600);
 
         CanvasApplication monJeu = new CanvasApplication();
         monJeu.start(nouvelleFenetre);

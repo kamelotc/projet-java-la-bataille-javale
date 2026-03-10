@@ -1,7 +1,4 @@
-package school.coda.lucas.colomban.modele;
-
-import modele.Bateau;
-import modele.Orientation;
+package school.coda.lucas.colomban.fxml.projetjavalabataillejavale.modele;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +41,28 @@ public class Grille {
         listeBateaux.add(bateau);
         return true;
     }
+    /**
+     * Retire un bateau de la grille (pour pouvoir le déplacer).
+     */
+    public void retirerBateau(Bateau bateau) {
+        if (bateau != null && listeBateaux.contains(bateau)) {
+            // 1. On le retire de notre liste
+            listeBateaux.remove(bateau);
 
+            // 2. On remet les cases de l'océan à null (elles redeviennent de l'eau)
+            int taille = bateau.getType().getTaille();
+            int x = bateau.getCoordonneeX();
+            int y = bateau.getCoordonneeY();
+
+            for (int i = 0; i < taille; i++) {
+                if (bateau.getOrientation() == Orientation.HORIZONTAL) {
+                    ocean[y][x + i] = null;
+                } else {
+                    ocean[y + i][x] = null;
+                }
+            }
+        }
+    }
     /**
      * Vérifie si le bateau respecte les limites et ne chevauche pas un autre bateau.
      */

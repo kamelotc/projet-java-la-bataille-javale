@@ -1,4 +1,4 @@
-package modele;
+package school.coda.lucas.colomban.fxml.projetjavalabataillejavale.modele;
 
 public class Bateau {
     private TypeBateau type;
@@ -20,7 +20,6 @@ public class Bateau {
     public boolean estCouler(){
         return casesTouchees >= type.getTaille();
     }
-    // --- Les Getters ---
 
     public TypeBateau getType() {
         return type;
