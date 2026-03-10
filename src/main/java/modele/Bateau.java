@@ -20,4 +20,21 @@ public class Bateau {
     public boolean estCouler(){
         return casesTouchees >= type.getTaille();
     }
+    // --- Les Getters ---
+
+    public TypeBateau getType() {
+        return type;
+    }
+
+    public Orientation getOrientation() {
+        return orientation;
+    }
+
+    public int getCoordonneeX() {
+        return coordonneeX;
+    }
+
+    public int getCoordonneeY() {
+        return coordonneeY;
+    }
 }
