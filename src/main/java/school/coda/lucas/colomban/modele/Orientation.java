@@ -4,4 +4,3 @@ package school.coda.lucas.colomban.modele;
         HORIZONTAL,
         VERTICAL
     }
-
