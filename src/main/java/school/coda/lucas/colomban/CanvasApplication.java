@@ -30,6 +30,8 @@ public class CanvasApplication extends Application {
     private static final int HAUTEUR_CANVAS = 600;
 
     private Grille maGrille;
+    private SystemeDeTir monSystemeDeTir;
+    private boolean enPhaseDePlacement = true;
 
     private class BateauGraphique {
         TypeBateau type;
@@ -72,8 +74,10 @@ public class CanvasApplication extends Application {
 
         final Canvas canvas = new Canvas(LARGEUR_CANVAS, HAUTEUR_CANVAS);
         GraphicsContext gc = canvas.getGraphicsContext2D();
+        monSystemeDeTir = new SystemeDeTir(maGrille, gc);
 
         canvas.setOnMousePressed(event -> {
+            if (!enPhaseDePlacement) return;
             double mx = event.getX();
             double my = event.getY();
 
@@ -123,6 +127,7 @@ public class CanvasApplication extends Application {
         });
 
         canvas.setOnMouseDragged(event -> {
+            if (!enPhaseDePlacement) return;
             if (bateauEnCoursDeDrag != null) {
                 bateauEnCoursDeDrag.x = event.getX() - dragOffsetX;
                 bateauEnCoursDeDrag.y = event.getY() - dragOffsetY;
@@ -131,6 +136,7 @@ public class CanvasApplication extends Application {
         });
 
         canvas.setOnMouseReleased(event -> {
+            if (!enPhaseDePlacement) return;
             if (bateauEnCoursDeDrag != null) {
                 int caseX = (int) ((bateauEnCoursDeDrag.x + (TAILLE_CASE / 2) - MARGE) / TAILLE_CASE);
                 int caseY = (int) ((bateauEnCoursDeDrag.y + (TAILLE_CASE / 2) - MARGE) / TAILLE_CASE);
@@ -156,15 +162,46 @@ public class CanvasApplication extends Application {
             }
         });
 
+        canvas.setOnMouseClicked(event -> {
+
+            if (enPhaseDePlacement) return;
+
+            if (event.getButton() == MouseButton.PRIMARY) {
+                monSystemeDeTir.gererClicTir(event.getX(), event.getY());
+                rafraichirEcran(gc);
+            }
+        });
+
         rafraichirEcran(gc);
+
+        javafx.scene.control.Button btnCombattre = new javafx.scene.control.Button("Combattre");
+        btnCombattre.setOnAction(e -> {
+            // On vérifie que tous les bateaux sont posés
+            boolean tousPlaces = true;
+            for (BateauGraphique b : flotte) {
+                if (!b.estPlace) tousPlaces = false;
+            }
+
+            if (tousPlaces) {
+                enPhaseDePlacement = false;
+                btnCombattre.setText("Bataille en cours...");
+                btnCombattre.setDisable(true);
+            } else {
+                btnCombattre.setText("Placez la flotte d'abord");
+            }
+        });
 
         Group group = new Group();
         group.getChildren().add(canvas);
-        BorderPane root = new BorderPane(group);
+
+        javafx.scene.layout.VBox conteneur = new javafx.scene.layout.VBox(15);
+        conteneur.getChildren().addAll(group, btnCombattre);
+
+        BorderPane root = new BorderPane(conteneur);
         root.setPadding(new Insets(10));
 
-        Scene scene = new Scene(root, LARGEUR_CANVAS + 20, HAUTEUR_CANVAS + 20, Color.WHITE);
-        stage.setTitle("Bataille Navale - Placement");
+        Scene scene = new Scene(root, LARGEUR_CANVAS + 20, HAUTEUR_CANVAS + 60, Color.WHITE);
+        stage.setTitle("Bataille Navale");
         stage.setScene(scene);
         stage.show();
     }
@@ -185,6 +222,7 @@ public class CanvasApplication extends Application {
             double hauteur = (b.getOrientation() == Orientation.VERTICAL) ? b.getType().getTaille() * TAILLE_CASE : TAILLE_CASE;
             gc.fillRect(xPixel, yPixel, largeur, hauteur);
             gc.strokeRect(xPixel, yPixel, largeur, hauteur);
+
         }
 
         gc.setLineWidth(1);
@@ -203,6 +241,7 @@ public class CanvasApplication extends Application {
                 gc.strokeRect(b.x, b.y, largeur, hauteur);
             }
         }
+        monSystemeDeTir.dessinerTirs();
     }
 
     private void dessinerDecor(GraphicsContext gc) {

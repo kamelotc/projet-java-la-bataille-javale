@@ -25,10 +25,9 @@ public class MenuController {
         Stage nouvelleFenetre = new Stage();
 
         nouvelleFenetre.setWidth(600);
-        nouvelleFenetre.setHeight(600);
-
+        nouvelleFenetre.setHeight(750);
         nouvelleFenetre.setMinWidth(600);
-        nouvelleFenetre.setMinHeight(600);
+        nouvelleFenetre.setMinHeight(750);
 
         CanvasApplication monJeu = new CanvasApplication();
         monJeu.start(nouvelleFenetre);
@@ -54,6 +53,26 @@ public class MenuController {
 
         } catch (IOException e) {
             System.out.println("Impossible de charger la page");
+            e.printStackTrace();
+        }
+
+    }
+    @FXML
+    protected void onRetourButtonClick(ActionEvent event) {
+        try {
+            // On charge la page du menu d'accueil (menu-view.fxml)
+            FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("menu-view.fxml"));
+            Scene sceneMenu = new Scene(fxmlLoader.load(), 400, 400);
+
+            // On récupère la fenêtre (Stage) actuelle grâce au bouton cliqué
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+
+            // On remplace la scène actuelle par celle du menu
+            stage.setScene(sceneMenu);
+            stage.setTitle("Bataille Javale");
+
+        } catch (IOException e) {
+            System.out.println("Impossible de charger le menu principal");
             e.printStackTrace();
         }
     }

@@ -8,9 +8,14 @@ public class Grille {
     private Bateau[][] ocean;
     private List<Bateau> listeBateaux;
 
+    private boolean[][] tirsRates;
+    private boolean[][] tirsTouches;
+
     public Grille() {
         this.ocean = new Bateau[TAILLE][TAILLE];
         this.listeBateaux = new ArrayList<>();
+        this.tirsRates = new boolean[TAILLE][TAILLE];
+        this.tirsTouches = new boolean[TAILLE][TAILLE];
     }
 
     /**
@@ -106,4 +111,37 @@ public class Grille {
     public List<Bateau> getListeBateaux() {
         return listeBateaux;
     }
+
+    public boolean recevoirTir(int x, int y) {
+        // 1. Vérification des limites de la grille
+        if (x < 0 || x >= TAILLE || y < 0 || y >= TAILLE) {
+            return false;
+        }
+
+        // 2. Si on a déjà tiré ici, on ignore
+        if (tirsRates[y][x] || tirsTouches[y][x]) {
+            return false;
+        }
+
+        // 3. Est-ce qu'on touche un bateau ?
+        if (ocean[y][x] != null) {
+            ocean[y][x].toucher();
+            tirsTouches[y][x] = true; // TOUCHÉ !
+
+            // Petit bonus console pour voir si ça coule
+            if (ocean[y][x].estCouler()) {
+                System.out.println("Touché-Coulé : " + ocean[y][x].getType().getNom());
+            } else {
+                System.out.println("Touché");
+            }
+            return true;
+        } else {
+            tirsRates[y][x] = true; // RATÉ !
+            System.out.println("Plouf");
+            return false;
+        }
+    }
+
+    public boolean[][] getTirsRates() { return tirsRates; }
+    public boolean[][] getTirsTouches() { return tirsTouches; }
 }
