@@ -1,6 +1,7 @@
 package school.coda.lucas.colomban;
 
 import javafx.application.Application;
+import javafx.animation.PauseTransition;
 import javafx.geometry.Insets;
 import javafx.scene.Group;
 import javafx.scene.Scene;
@@ -8,10 +9,12 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.media.MediaPlayer;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 import school.coda.lucas.colomban.modele.Bateau;
 import school.coda.lucas.colomban.modele.Grille;
@@ -23,7 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CanvasApplication extends Application {
-
+    private MediaPlayer lecteurMusiqueJeu;
     private static final int TAILLE_GRILLE = 10;
     private static final int TAILLE_CASE = 30;
     private static final int MARGE = 30;
@@ -42,6 +45,7 @@ public class CanvasApplication extends Application {
         Orientation orientation = Orientation.HORIZONTAL;
         double x, y, startX, startY;
         boolean estPlace = false;
+
         Bateau bateauLogique = null;
 
         public BateauGraphique(TypeBateau type, double startX, double startY) {
@@ -66,6 +70,18 @@ public class CanvasApplication extends Application {
 
     @Override
     public void start(Stage stage) {
+        // Lancement de la musique de combat
+        java.net.URL cheminMusique = getClass().getResource("/school/coda/lucas/colomban/audio/musique_combat.mp3");
+        if (cheminMusique != null) {
+            javafx.scene.media.Media media = new javafx.scene.media.Media(cheminMusique.toExternalForm());
+            lecteurMusiqueJeu = new javafx.scene.media.MediaPlayer(media);
+            lecteurMusiqueJeu.setCycleCount(javafx.scene.media.MediaPlayer.INDEFINITE);
+            lecteurMusiqueJeu.setVolume(0.4);
+            lecteurMusiqueJeu.play();
+        } else {
+            System.out.println("Musique du jeu introuvable !");
+        }
+
         maGrille = new Grille();
         ordi = new JoueurOrdi();
 
@@ -86,7 +102,6 @@ public class CanvasApplication extends Application {
         journalDeBord.setStyle("-fx-font-family: monospace; -fx-font-size: 14px; -fx-font-weight: bold;");
         journalDeBord.appendText(">> Placez vos 5 bateaux sur la grille de gauche.\n");
 
-
         canvas.setOnMousePressed(event -> {
             if (!enPhaseDePlacement) return;
             double mx = event.getX();
@@ -94,9 +109,11 @@ public class CanvasApplication extends Application {
 
             for (int i = flotte.size() - 1; i >= 0; i--) {
                 BateauGraphique b = flotte.get(i);
+
                 if (b.contient(mx, my)) {
                     if (event.getButton() == MouseButton.SECONDARY) {
                         b.orientation = (b.orientation == Orientation.HORIZONTAL) ? Orientation.VERTICAL : Orientation.HORIZONTAL;
+
                         if (b.estPlace) {
                             maGrille.retirerBateau(b.bateauLogique);
                             Bateau testPivot = new Bateau(b.type, b.orientation, b.bateauLogique.getCoordonneeX(), b.bateauLogique.getCoordonneeY());
@@ -146,6 +163,7 @@ public class CanvasApplication extends Application {
                 if (maGrille.placerBateau(bateauTest)) {
                     bateauEnCoursDeDrag.estPlace = true;
                     bateauEnCoursDeDrag.bateauLogique = bateauTest;
+
                     bateauEnCoursDeDrag.x = MARGE + (caseX * TAILLE_CASE);
                     bateauEnCoursDeDrag.y = MARGE + (caseY * TAILLE_CASE);
                 } else {
@@ -161,6 +179,9 @@ public class CanvasApplication extends Application {
         canvas.setOnMouseClicked(event -> {
             if (enPhaseDePlacement) return;
 
+            // 1. SÉCURITÉ ANTI DOUBLE-CLIC : On ignore les clics multiples
+            if (event.getClickCount() > 1) return;
+
             if (event.getButton() == MouseButton.PRIMARY) {
                 double mx = event.getX();
                 double my = event.getY();
@@ -171,25 +192,42 @@ public class CanvasApplication extends Application {
                     int caseX = (int) ((mx - DECALAGE_RADAR) / TAILLE_CASE);
                     int caseY = (int) ((my - MARGE) / TAILLE_CASE);
 
-                    //Anti-triche
+                    // Anti-triche
                     boolean[][] touches = ordi.getSaGrille().getTirsTouches();
                     boolean[][] rates = ordi.getSaGrille().getTirsRates();
-
 
                     if (touches[caseY][caseX] || rates[caseY][caseX]) {
                         journalDeBord.appendText(">> ATTENTION : Case " + (char)('A' + caseY) + "-" + (caseX + 1) + " déjà ciblée ! Tir annulé.\n");
                         return;
                     }
 
-                    //Tires sur l'ordi
+                    // 1. VOUS TIREZ SUR L'ORDI
                     ordi.getSaGrille().recevoirTir(caseX, caseY);
                     journalDeBord.appendText("VOUS  : " + ordi.getSaGrille().getDernierMessage() + "\n");
 
-                    //l'ordi riposte
-                    ordi.jouerTour(maGrille);
-                    journalDeBord.appendText("ORDI  : " + maGrille.getDernierMessage() + "\n\n");
+                    // VERIFICATION : Est-ce que le joueur a gagné ?
+                    if (ordi.getSaGrille().estFlotteCoulee()) {
+                        afficherEcranFin("FÉLICITATIONS !\nVous avez détruit la flotte ennemie !", stage);
+                        return;
+                    }
 
-                    rafraichirEcran(gc);
+                    rafraichirEcran(gc); // On affiche tout de suite le tir du joueur
+
+                    // 2. L'ORDI RIPOSTE AVEC 0.5 SECONDE DE DÉLAI
+                    PauseTransition pause = new PauseTransition(Duration.seconds(0.5));
+                    pause.setOnFinished(e -> {
+                        ordi.jouerTour(maGrille);
+                        journalDeBord.appendText("ORDI  : " + maGrille.getDernierMessage() + "\n\n");
+
+                        // VERIFICATION : Est-ce que l'ordi a gagné ?
+                        if (maGrille.estFlotteCoulee()) {
+                            afficherEcranFin("DÉFAITE...\nL'ordinateur a coulé tous vos navires.", stage);
+                            return;
+                        }
+
+                        rafraichirEcran(gc); // On affiche le tir de l'ordi après la pause
+                    });
+                    pause.play();
                 }
             }
         });
@@ -241,6 +279,7 @@ public class CanvasApplication extends Application {
         gc.setFill(Color.DARKGRAY);
         gc.setStroke(Color.BLACK);
         gc.setLineWidth(2);
+
         // On dessine les bateaux du joueur (Grille de gauche)
         for (Bateau b : maGrille.getListeBateaux()) {
             double xPixel = MARGE + (b.getCoordonneeX() * TAILLE_CASE);
@@ -261,7 +300,6 @@ public class CanvasApplication extends Application {
                 gc.strokeRect(b.x, b.y, largeur, hauteur);
             }
         }
-
 
         monSystemeDeTir.dessinerTousLesTirs(maGrille, ordi.getSaGrille());
     }
@@ -305,6 +343,27 @@ public class CanvasApplication extends Application {
             gc.fillText("VOTRE FLOTTE (Défense)", MARGE, MARGE - 15);
             gc.setFill(Color.RED);
             gc.fillText("RADAR (Cliquez ici pour attaquer !)", DECALAGE_RADAR, MARGE - 15);
+        }
+    }
+
+    private void afficherEcranFin(String message, Stage stage) {
+        // On coupe la musique du combat
+        if (lecteurMusiqueJeu != null) {
+            lecteurMusiqueJeu.stop();
+        }
+
+        try {
+            javafx.fxml.FXMLLoader fxmlLoader = new javafx.fxml.FXMLLoader(school.coda.lucas.colomban.Main.class.getResource("game-over-view.fxml"));
+            Scene scene = new Scene(fxmlLoader.load(), 500, 400);
+
+            // On récupère le controller pour lui passer le message de victoire
+            school.coda.lucas.colomban.controller.GameOverController controller = fxmlLoader.getController();
+            controller.setWinnerMessage(message);
+
+            stage.setScene(scene);
+            stage.setTitle("Fin de la Bataille !");
+        } catch (java.io.IOException e) {
+            e.printStackTrace();
         }
     }
 }
