@@ -158,7 +158,6 @@ public class CanvasApplication extends Application {
             }
         });
 
-
         canvas.setOnMouseClicked(event -> {
             if (enPhaseDePlacement) return;
 
@@ -172,15 +171,23 @@ public class CanvasApplication extends Application {
                     int caseX = (int) ((mx - DECALAGE_RADAR) / TAILLE_CASE);
                     int caseY = (int) ((my - MARGE) / TAILLE_CASE);
 
-                    // 1. TU TIRES SUR L'ORDI
+                    //Anti-triche
+                    boolean[][] touches = ordi.getSaGrille().getTirsTouches();
+                    boolean[][] rates = ordi.getSaGrille().getTirsRates();
+
+
+                    if (touches[caseY][caseX] || rates[caseY][caseX]) {
+                        journalDeBord.appendText(">> ATTENTION : Case " + (char)('A' + caseY) + "-" + (caseX + 1) + " déjà ciblée ! Tir annulé.\n");
+                        return;
+                    }
+
+                    //Tires sur l'ordi
                     ordi.getSaGrille().recevoirTir(caseX, caseY);
-                    // ON ÉCRIT DANS LE JOURNAL :
                     journalDeBord.appendText("VOUS  : " + ordi.getSaGrille().getDernierMessage() + "\n");
 
-                    // 2. L'ORDI RIPOSTE
+                    //l'ordi riposte
                     ordi.jouerTour(maGrille);
-                    // ON ÉCRIT DANS LE JOURNAL (avec un double \n pour sauter une ligne) :
-                    journalDeBord.appendText("ORDINATEUR : " + maGrille.getDernierMessage() + "\n\n");
+                    journalDeBord.appendText("ORDI  : " + maGrille.getDernierMessage() + "\n\n");
 
                     rafraichirEcran(gc);
                 }
