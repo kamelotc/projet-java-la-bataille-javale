@@ -8,7 +8,7 @@ public class SystemeDeTir {
 
     private static final int TAILLE_GRILLE = 10;
     private static final int TAILLE_CASE = 30;
-    private static final int MARGE = 30;
+    private static final int MARGE = 50;
     private static final int DECALAGE_RADAR = 400; // La position de la 2ème grille
 
     private GraphicsContext gc;

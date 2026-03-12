@@ -29,7 +29,7 @@ public class CanvasApplication extends Application {
     private MediaPlayer lecteurMusiqueJeu;
     private static final int TAILLE_GRILLE = 10;
     private static final int TAILLE_CASE = 30;
-    private static final int MARGE = 30;
+    private static final int MARGE = 50;
     private static final int DECALAGE_RADAR = 400;
     private static final int LARGEUR_CANVAS = 800;
     private static final int HAUTEUR_CANVAS = 600;
@@ -85,11 +85,11 @@ public class CanvasApplication extends Application {
         ordi = new JoueurOrdi();
 
         flotte = new ArrayList<>();
-        flotte.add(new BateauGraphique(TypeBateau.PORTE_AVIONS, 30, 420));
-        flotte.add(new BateauGraphique(TypeBateau.CUIRASSE, 30, 470));
-        flotte.add(new BateauGraphique(TypeBateau.DESTROYER, 30, 520));
-        flotte.add(new BateauGraphique(TypeBateau.SOUS_MARIN, 180, 470));
-        flotte.add(new BateauGraphique(TypeBateau.PATROUILLEUR, 180, 520));
+        flotte.add(new BateauGraphique(TypeBateau.PORTE_AVIONS, 50, 420));
+        flotte.add(new BateauGraphique(TypeBateau.CUIRASSE, 50, 470));
+        flotte.add(new BateauGraphique(TypeBateau.DESTROYER, 50, 520));
+        flotte.add(new BateauGraphique(TypeBateau.SOUS_MARIN, 200, 470));
+        flotte.add(new BateauGraphique(TypeBateau.PATROUILLEUR, 200, 520));
 
         final Canvas canvas = new Canvas(LARGEUR_CANVAS, HAUTEUR_CANVAS);
         GraphicsContext gc = canvas.getGraphicsContext2D();
@@ -299,13 +299,27 @@ public class CanvasApplication extends Application {
     }
 
     private void dessinerDecor(GraphicsContext gc) {
-        // Fond Eau Gauche
+
         gc.setFill(Color.LIGHTBLUE);
         gc.fillRect(MARGE, MARGE, TAILLE_GRILLE * TAILLE_CASE, TAILLE_GRILLE * TAILLE_CASE);
-        // Fond Eau Droite
         gc.fillRect(DECALAGE_RADAR, MARGE, TAILLE_GRILLE * TAILLE_CASE, TAILLE_GRILLE * TAILLE_CASE);
-
         gc.setFont(Font.font("Arial", FontWeight.BOLD, 14));
+
+        if (enPhaseDePlacement) {
+            gc.setFill(Color.BLUE);
+            gc.fillText("VOTRE FLOTTE (Placez vos bateaux)", MARGE, MARGE - 30);
+            gc.setFill(Color.RED);
+            gc.fillText("RADAR (Désactivé)", DECALAGE_RADAR, MARGE - 30);
+
+            gc.setFill(Color.BLACK);
+            gc.fillText("Chantier naval (Clic droit pour tourner): ", 50, 400);
+        } else {
+            gc.setFill(Color.BLUE);
+            gc.fillText("VOTRE FLOTTE (Défense)", MARGE, MARGE - 30);
+            gc.setFill(Color.RED);
+            gc.fillText("RADAR (Cliquez ici pour attaquer !)", DECALAGE_RADAR, MARGE - 30);
+        }
+
         gc.setFill(Color.BLACK);
 
         for (int i = 0; i <= TAILLE_GRILLE; i++) {
@@ -315,30 +329,18 @@ public class CanvasApplication extends Application {
 
             gc.strokeLine(posG1, MARGE, posG1, MARGE + (TAILLE_GRILLE * TAILLE_CASE));
             gc.strokeLine(MARGE, posG1, MARGE + (TAILLE_GRILLE * TAILLE_CASE), posG1);
-            // Grille Droite
             gc.strokeLine(posG2, MARGE, posG2, MARGE + (TAILLE_GRILLE * TAILLE_CASE));
             gc.strokeLine(DECALAGE_RADAR, posG1, DECALAGE_RADAR + (TAILLE_GRILLE * TAILLE_CASE), posG1);
 
             if (i < TAILLE_GRILLE) {
                 gc.fillText(String.valueOf(i + 1), posG1 + 10, MARGE - 10);
                 gc.fillText(String.valueOf((char) ('A' + i)), MARGE - 20, posG1 + 20);
+
                 gc.fillText(String.valueOf(i + 1), posG2 + 10, MARGE - 10);
                 gc.fillText(String.valueOf((char) ('A' + i)), DECALAGE_RADAR - 20, posG1 + 20);
             }
         }
-
-        if (enPhaseDePlacement) {
-            gc.fillText("VOTRE FLOTTE (Placez vos bateaux)", MARGE, MARGE - 15);
-            gc.fillText("RADAR (Désactivé)", DECALAGE_RADAR, MARGE - 15);
-            gc.fillText("Chantier naval (Clic droit pour tourner): ", 30, 400);
-        } else {
-            gc.setFill(Color.BLUE);
-            gc.fillText("VOTRE FLOTTE (Défense)", MARGE, MARGE - 15);
-            gc.setFill(Color.RED);
-            gc.fillText("RADAR (Cliquez ici pour attaquer !)", DECALAGE_RADAR, MARGE - 15);
-        }
     }
-
     private void afficherEcranFin(String message, Stage stage) {
 
         if (lecteurMusiqueJeu != null) {
