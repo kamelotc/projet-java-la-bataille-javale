@@ -24,26 +24,23 @@ public class Grille {
     }
 
     public boolean placerBateau(Bateau bateau) {
-        // 1. On vérifie si le placement est légal
         if (!estPlacementValide(bateau)) {
             System.out.println("Placement impossible pour le " + bateau.getType().getNom());
             return false;
         }
 
-        // 2. Si c'est valide, on place le bateau dans le tableau 2D
         int taille = bateau.getType().getTaille();
-        int x = bateau.getCoordonneeX(); // Colonne
-        int y = bateau.getCoordonneeY(); // Ligne
+        int x = bateau.getCoordonneeX();
+        int y = bateau.getCoordonneeY();
 
         for (int i = 0; i < taille; i++) {
             if (bateau.getOrientation() == Orientation.HORIZONTAL) {
-                ocean[y][x + i] = bateau; // On avance sur les colonnes (X)
+                ocean[y][x + i] = bateau;
             } else {
-                ocean[y + i][x] = bateau; // On avance sur les lignes (Y)
+                ocean[y + i][x] = bateau;
             }
         }
 
-        // 3. On ajoute le bateau à notre liste pour s'en souvenir
         listeBateaux.add(bateau);
         return true;
     }
@@ -52,10 +49,8 @@ public class Grille {
      */
     public void retirerBateau(Bateau bateau) {
         if (bateau != null && listeBateaux.contains(bateau)) {
-            // 1. On le retire de notre liste
             listeBateaux.remove(bateau);
 
-            // 2. On remet les cases de l'océan à null (elles redeviennent de l'eau)
             int taille = bateau.getType().getTaille();
             int x = bateau.getCoordonneeX();
             int y = bateau.getCoordonneeY();
@@ -77,24 +72,20 @@ public class Grille {
         int startX = bateau.getCoordonneeX();
         int startY = bateau.getCoordonneeY();
 
-        // 1. Vérification des limites de la grille (0 à 9)
         if (startX < 0 || startY < 0) {
             return false;
         }
 
         if (bateau.getOrientation() == Orientation.HORIZONTAL) {
-            // Si horizontal, on vérifie que le bout du bateau (X + taille) ne dépasse pas 10
             if (startX + taille > TAILLE) {
                 return false;
             }
         } else {
-            // Si vertical, on vérifie que le bout du bateau (Y + taille) ne dépasse pas 10
             if (startY + taille > TAILLE) {
                 return false;
             }
         }
 
-        // 2. Vérification des collisions avec d'autres bateaux
         for (int i = 0; i < taille; i++) {
             int caseX = (bateau.getOrientation() == Orientation.HORIZONTAL) ? startX + i : startX;
             int caseY = (bateau.getOrientation() == Orientation.VERTICAL) ? startY + i : startY;
@@ -114,7 +105,6 @@ public class Grille {
     }
 
     public boolean recevoirTir(int x, int y) {
-        // Vérification des limites de la grille
         if (x < 0 || x >= TAILLE || y < 0 || y >= TAILLE) {
             return false;
         }

@@ -23,23 +23,20 @@ public class JoueurOrdi {
 
         for (TypeBateau type : types) {
             boolean place = false;
-            // Tant que le bateau n'est pas bien placé, on recommence au hasard
             while (!place) {
                 int x = random.nextInt(Grille.TAILLE);
                 int y = random.nextInt(Grille.TAILLE);
-                // Pile ou face pour l'orientation
+
                 Orientation orientation = random.nextBoolean() ? Orientation.HORIZONTAL : Orientation.VERTICAL;
 
                 Bateau bateauTest = new Bateau(type, orientation, x, y);
 
-                // placerBateau renvoie "true" si la case est libre
                 place = saGrille.placerBateau(bateauTest);
             }
         }
         System.out.println("L'ordinateur a placé tous ses bateaux");
     }
 
-    // L'ordi tire au hasard
     public void jouerTour(Grille grilleJoueur) {
         boolean tirValide = false;
 

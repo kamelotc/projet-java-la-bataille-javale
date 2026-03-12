@@ -70,7 +70,6 @@ public class CanvasApplication extends Application {
 
     @Override
     public void start(Stage stage) {
-        // Lancement de la musique de combat
         java.net.URL cheminMusique = getClass().getResource("/school/coda/lucas/colomban/audio/musique_combat.mp3");
         if (cheminMusique != null) {
             javafx.scene.media.Media media = new javafx.scene.media.Media(cheminMusique.toExternalForm());
@@ -201,11 +200,9 @@ public class CanvasApplication extends Application {
                         return;
                     }
 
-                    // 1. VOUS TIREZ SUR L'ORDI
                     ordi.getSaGrille().recevoirTir(caseX, caseY);
                     journalDeBord.appendText("VOUS  : " + ordi.getSaGrille().getDernierMessage() + "\n");
 
-                    // VERIFICATION : Est-ce que le joueur a gagné ?
                     if (ordi.getSaGrille().estFlotteCoulee()) {
                         afficherEcranFin("FÉLICITATIONS !\nVous avez détruit la flotte ennemie !", stage);
                         return;
@@ -213,19 +210,17 @@ public class CanvasApplication extends Application {
 
                     rafraichirEcran(gc); // On affiche tout de suite le tir du joueur
 
-                    // 2. L'ORDI RIPOSTE AVEC 0.5 SECONDE DE DÉLAI
                     PauseTransition pause = new PauseTransition(Duration.seconds(0.5));
                     pause.setOnFinished(e -> {
                         ordi.jouerTour(maGrille);
                         journalDeBord.appendText("ORDI  : " + maGrille.getDernierMessage() + "\n\n");
 
-                        // VERIFICATION : Est-ce que l'ordi a gagné ?
                         if (maGrille.estFlotteCoulee()) {
                             afficherEcranFin("DÉFAITE...\nL'ordinateur a coulé tous vos navires.", stage);
                             return;
                         }
 
-                        rafraichirEcran(gc); // On affiche le tir de l'ordi après la pause
+                        rafraichirEcran(gc);
                     });
                     pause.play();
                 }
@@ -280,7 +275,6 @@ public class CanvasApplication extends Application {
         gc.setStroke(Color.BLACK);
         gc.setLineWidth(2);
 
-        // On dessine les bateaux du joueur (Grille de gauche)
         for (Bateau b : maGrille.getListeBateaux()) {
             double xPixel = MARGE + (b.getCoordonneeX() * TAILLE_CASE);
             double yPixel = MARGE + (b.getCoordonneeY() * TAILLE_CASE);
@@ -319,7 +313,6 @@ public class CanvasApplication extends Application {
             double posG2 = DECALAGE_RADAR + (i * TAILLE_CASE);
             gc.setStroke(Color.BLACK);
 
-            // Grille Gauche
             gc.strokeLine(posG1, MARGE, posG1, MARGE + (TAILLE_GRILLE * TAILLE_CASE));
             gc.strokeLine(MARGE, posG1, MARGE + (TAILLE_GRILLE * TAILLE_CASE), posG1);
             // Grille Droite
@@ -347,7 +340,7 @@ public class CanvasApplication extends Application {
     }
 
     private void afficherEcranFin(String message, Stage stage) {
-        // On coupe la musique du combat
+
         if (lecteurMusiqueJeu != null) {
             lecteurMusiqueJeu.stop();
         }
@@ -356,7 +349,6 @@ public class CanvasApplication extends Application {
             javafx.fxml.FXMLLoader fxmlLoader = new javafx.fxml.FXMLLoader(school.coda.lucas.colomban.Main.class.getResource("game-over-view.fxml"));
             Scene scene = new Scene(fxmlLoader.load(), 500, 400);
 
-            // On récupère le controller pour lui passer le message de victoire
             school.coda.lucas.colomban.controller.GameOverController controller = fxmlLoader.getController();
             controller.setWinnerMessage(message);
 
