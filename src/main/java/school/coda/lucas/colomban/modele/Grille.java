@@ -10,6 +10,7 @@ public class Grille {
 
     private boolean[][] tirsRates;
     private boolean[][] tirsTouches;
+    private String dernierMessage = "";
 
     public Grille() {
         this.ocean = new Bateau[TAILLE][TAILLE];
@@ -18,10 +19,10 @@ public class Grille {
         this.tirsTouches = new boolean[TAILLE][TAILLE];
     }
 
-    /**
-     * Tente de placer un bateau sur la grille.
-     * @return true si le placement a réussi, false s'il est impossible.
-     */
+    public String getDernierMessage() {
+        return dernierMessage;
+    }
+
     public boolean placerBateau(Bateau bateau) {
         // 1. On vérifie si le placement est légal
         if (!estPlacementValide(bateau)) {
@@ -113,33 +114,43 @@ public class Grille {
     }
 
     public boolean recevoirTir(int x, int y) {
-        // 1. Vérification des limites de la grille
+        // Vérification des limites de la grille
         if (x < 0 || x >= TAILLE || y < 0 || y >= TAILLE) {
             return false;
         }
 
-        // 2. Si on a déjà tiré ici, on ignore
+
         if (tirsRates[y][x] || tirsTouches[y][x]) {
             return false;
         }
 
-        // 3. Est-ce qu'on touche un bateau ?
+        String coordonnees = (char)('A' + y) + "-" + (x + 1);
+
         if (ocean[y][x] != null) {
             ocean[y][x].toucher();
-            tirsTouches[y][x] = true; // TOUCHÉ !
+            tirsTouches[y][x] = true; // TOUCHÉ
 
-            // Petit bonus console pour voir si ça coule
             if (ocean[y][x].estCouler()) {
-                System.out.println("Touché-Coulé : " + ocean[y][x].getType().getNom());
+
+                dernierMessage = coordonnees + " -> Touché-Coulé (" + ocean[y][x].getType().getNom() + ") !";
             } else {
-                System.out.println("Touché");
+                dernierMessage = coordonnees + " -> Touché !";
             }
             return true;
         } else {
-            tirsRates[y][x] = true; // RATÉ !
-            System.out.println("Plouf");
+            tirsRates[y][x] = true; // RATÉ
+            dernierMessage = coordonnees + " -> Plouf (Raté).";
             return false;
         }
+    }
+
+    public boolean estFlotteCoulee() {
+        for (Bateau bateau : listeBateaux) {
+            if (!bateau.estCouler()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public boolean[][] getTirsRates() { return tirsRates; }

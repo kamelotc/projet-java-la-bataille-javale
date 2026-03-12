@@ -6,41 +6,30 @@ import school.coda.lucas.colomban.modele.Grille;
 
 public class SystemeDeTir {
 
-    // On a besoin de connaître la taille des cases pour faire les calculs
     private static final int TAILLE_GRILLE = 10;
     private static final int TAILLE_CASE = 30;
     private static final int MARGE = 30;
+    private static final int DECALAGE_RADAR = 400; // La position de la 2ème grille
 
-    private Grille grille;
     private GraphicsContext gc;
-    public SystemeDeTir(Grille grille, GraphicsContext gc) {
-        this.grille = grille;
+
+    public SystemeDeTir(GraphicsContext gc) {
         this.gc = gc;
     }
 
-    //  Méthode qui s'occupe de calculer le tir
-    public void gererClicTir(double mouseX, double mouseY) {
-        // On vérifie qu'on clique bien sur la mer
-        if (mouseX >= MARGE && mouseY >= MARGE &&
-                mouseX < MARGE + (TAILLE_GRILLE * TAILLE_CASE) &&
-                mouseY < MARGE + (TAILLE_GRILLE * TAILLE_CASE)) {
-
-            int caseX = (int) ((mouseX - MARGE) / TAILLE_CASE);
-            int caseY = (int) ((mouseY - MARGE) / TAILLE_CASE);
-
-            // On envoie le tir à la grille
-            grille.recevoirTir(caseX, caseY);
-        }
+    // On dessine les tirs sur TES bateaux, puis sur la grille de l'ORDI
+    public void dessinerTousLesTirs(Grille grilleJoueur, Grille grilleOrdi) {
+        dessinerTirsGrille(grilleJoueur, MARGE);          // À gauche
+        dessinerTirsGrille(grilleOrdi, DECALAGE_RADAR);   // À droite
     }
 
-    // 2. La méthode qui dessine les carrés
-    public void dessinerTirs() {
+    private void dessinerTirsGrille(Grille grille, int decalageX) {
         boolean[][] touches = grille.getTirsTouches();
         boolean[][] rates = grille.getTirsRates();
 
         for (int y = 0; y < TAILLE_GRILLE; y++) {
             for (int x = 0; x < TAILLE_GRILLE; x++) {
-                double xPixel = MARGE + (x * TAILLE_CASE);
+                double xPixel = decalageX + (x * TAILLE_CASE);
                 double yPixel = MARGE + (y * TAILLE_CASE);
 
                 if (touches[y][x]) {

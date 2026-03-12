@@ -15,6 +15,7 @@ import javafx.stage.Stage;
 
 import school.coda.lucas.colomban.modele.Bateau;
 import school.coda.lucas.colomban.modele.Grille;
+import school.coda.lucas.colomban.modele.JoueurOrdi;
 import school.coda.lucas.colomban.modele.Orientation;
 import school.coda.lucas.colomban.modele.TypeBateau;
 
@@ -26,20 +27,21 @@ public class CanvasApplication extends Application {
     private static final int TAILLE_GRILLE = 10;
     private static final int TAILLE_CASE = 30;
     private static final int MARGE = 30;
-    private static final int LARGEUR_CANVAS = 400;
+    private static final int DECALAGE_RADAR = 400;
+    private static final int LARGEUR_CANVAS = 800;
     private static final int HAUTEUR_CANVAS = 600;
 
     private Grille maGrille;
+    private JoueurOrdi ordi;
     private SystemeDeTir monSystemeDeTir;
     private boolean enPhaseDePlacement = true;
+    private javafx.scene.control.TextArea journalDeBord;
 
     private class BateauGraphique {
         TypeBateau type;
         Orientation orientation = Orientation.HORIZONTAL;
         double x, y, startX, startY;
         boolean estPlace = false;
-
-        // NOUVEAU : On garde un lien vers le "vrai" bateau dans la grille
         Bateau bateauLogique = null;
 
         public BateauGraphique(TypeBateau type, double startX, double startY) {
@@ -65,41 +67,42 @@ public class CanvasApplication extends Application {
     @Override
     public void start(Stage stage) {
         maGrille = new Grille();
+        ordi = new JoueurOrdi();
+
         flotte = new ArrayList<>();
-        flotte.add(new BateauGraphique(TypeBateau.PORTE_AVIONS, 30, 380));
-        flotte.add(new BateauGraphique(TypeBateau.CUIRASSE, 30, 430));
-        flotte.add(new BateauGraphique(TypeBateau.DESTROYER, 30, 480));
-        flotte.add(new BateauGraphique(TypeBateau.SOUS_MARIN, 180, 430));
-        flotte.add(new BateauGraphique(TypeBateau.PATROUILLEUR, 180, 480));
+        flotte.add(new BateauGraphique(TypeBateau.PORTE_AVIONS, 30, 420));
+        flotte.add(new BateauGraphique(TypeBateau.CUIRASSE, 30, 470));
+        flotte.add(new BateauGraphique(TypeBateau.DESTROYER, 30, 520));
+        flotte.add(new BateauGraphique(TypeBateau.SOUS_MARIN, 180, 470));
+        flotte.add(new BateauGraphique(TypeBateau.PATROUILLEUR, 180, 520));
 
         final Canvas canvas = new Canvas(LARGEUR_CANVAS, HAUTEUR_CANVAS);
         GraphicsContext gc = canvas.getGraphicsContext2D();
-        monSystemeDeTir = new SystemeDeTir(maGrille, gc);
+        monSystemeDeTir = new SystemeDeTir(gc);
+
+        journalDeBord = new javafx.scene.control.TextArea();
+        journalDeBord.setEditable(false);
+        journalDeBord.setPrefHeight(120);
+        journalDeBord.setStyle("-fx-font-family: monospace; -fx-font-size: 14px; -fx-font-weight: bold;");
+        journalDeBord.appendText(">> Placez vos 5 bateaux sur la grille de gauche.\n");
+
 
         canvas.setOnMousePressed(event -> {
             if (!enPhaseDePlacement) return;
             double mx = event.getX();
             double my = event.getY();
 
-            // On parcourt à l'envers au cas où des bateaux se superposent au chantier
             for (int i = flotte.size() - 1; i >= 0; i--) {
                 BateauGraphique b = flotte.get(i);
-
-                // On a retiré le "!b.estPlace" car on veut cliquer même sur ceux déjà placés !
                 if (b.contient(mx, my)) {
-
-                    if (event.getButton() == MouseButton.SECONDARY) { // CLIC DROIT
+                    if (event.getButton() == MouseButton.SECONDARY) {
                         b.orientation = (b.orientation == Orientation.HORIZONTAL) ? Orientation.VERTICAL : Orientation.HORIZONTAL;
-
-                        // Si le bateau était déjà posé, on vérifie s'il peut pivoter sans toucher un autre bateau
                         if (b.estPlace) {
                             maGrille.retirerBateau(b.bateauLogique);
                             Bateau testPivot = new Bateau(b.type, b.orientation, b.bateauLogique.getCoordonneeX(), b.bateauLogique.getCoordonneeY());
-
                             if (maGrille.placerBateau(testPivot)) {
-                                b.bateauLogique = testPivot; // Pivot réussi !
+                                b.bateauLogique = testPivot;
                             } else {
-                                // Pas de place pour pivoter, il retourne au port
                                 b.estPlace = false;
                                 b.bateauLogique = null;
                                 b.x = b.startX;
@@ -107,15 +110,12 @@ public class CanvasApplication extends Application {
                                 b.orientation = Orientation.HORIZONTAL;
                             }
                         }
-                    } else if (event.getButton() == MouseButton.PRIMARY) { // CLIC GAUCHE
-
-                        // Si on l'attrape alors qu'il est déjà sur la grille...
+                    } else if (event.getButton() == MouseButton.PRIMARY) {
                         if (b.estPlace) {
-                            maGrille.retirerBateau(b.bateauLogique); // ...on l'arrache de l'eau !
+                            maGrille.retirerBateau(b.bateauLogique);
                             b.estPlace = false;
                             b.bateauLogique = null;
                         }
-
                         bateauEnCoursDeDrag = b;
                         dragOffsetX = mx - b.x;
                         dragOffsetY = my - b.y;
@@ -145,10 +145,7 @@ public class CanvasApplication extends Application {
 
                 if (maGrille.placerBateau(bateauTest)) {
                     bateauEnCoursDeDrag.estPlace = true;
-                    // NOUVEAU : On sauvegarde le "vrai" bateau créé
                     bateauEnCoursDeDrag.bateauLogique = bateauTest;
-
-                    // BONUS : On "aimante" le bateau pile-poil dans les cases pour un visuel parfait !
                     bateauEnCoursDeDrag.x = MARGE + (caseX * TAILLE_CASE);
                     bateauEnCoursDeDrag.y = MARGE + (caseY * TAILLE_CASE);
                 } else {
@@ -156,19 +153,37 @@ public class CanvasApplication extends Application {
                     bateauEnCoursDeDrag.y = bateauEnCoursDeDrag.startY;
                     bateauEnCoursDeDrag.orientation = Orientation.HORIZONTAL;
                 }
-
                 bateauEnCoursDeDrag = null;
                 rafraichirEcran(gc);
             }
         });
 
-        canvas.setOnMouseClicked(event -> {
 
+        canvas.setOnMouseClicked(event -> {
             if (enPhaseDePlacement) return;
 
             if (event.getButton() == MouseButton.PRIMARY) {
-                monSystemeDeTir.gererClicTir(event.getX(), event.getY());
-                rafraichirEcran(gc);
+                double mx = event.getX();
+                double my = event.getY();
+
+                if (mx >= DECALAGE_RADAR && mx < DECALAGE_RADAR + (TAILLE_GRILLE * TAILLE_CASE) &&
+                        my >= MARGE && my < MARGE + (TAILLE_GRILLE * TAILLE_CASE)) {
+
+                    int caseX = (int) ((mx - DECALAGE_RADAR) / TAILLE_CASE);
+                    int caseY = (int) ((my - MARGE) / TAILLE_CASE);
+
+                    // 1. TU TIRES SUR L'ORDI
+                    ordi.getSaGrille().recevoirTir(caseX, caseY);
+                    // ON ÉCRIT DANS LE JOURNAL :
+                    journalDeBord.appendText("VOUS  : " + ordi.getSaGrille().getDernierMessage() + "\n");
+
+                    // 2. L'ORDI RIPOSTE
+                    ordi.jouerTour(maGrille);
+                    // ON ÉCRIT DANS LE JOURNAL (avec un double \n pour sauter une ligne) :
+                    journalDeBord.appendText("ORDINATEUR : " + maGrille.getDernierMessage() + "\n\n");
+
+                    rafraichirEcran(gc);
+                }
             }
         });
 
@@ -176,7 +191,6 @@ public class CanvasApplication extends Application {
 
         javafx.scene.control.Button btnCombattre = new javafx.scene.control.Button("Combattre");
         btnCombattre.setOnAction(e -> {
-            // On vérifie que tous les bateaux sont posés
             boolean tousPlaces = true;
             for (BateauGraphique b : flotte) {
                 if (!b.estPlace) tousPlaces = false;
@@ -184,10 +198,15 @@ public class CanvasApplication extends Application {
 
             if (tousPlaces) {
                 enPhaseDePlacement = false;
+
+                // L'ordi place ses bateaux
+                ordi.placerBateauxAleatoirement();
+
                 btnCombattre.setText("Bataille en cours...");
                 btnCombattre.setDisable(true);
+                rafraichirEcran(gc);
             } else {
-                btnCombattre.setText("Placez la flotte d'abord");
+                btnCombattre.setText("Placez toute la flotte d'abord");
             }
         });
 
@@ -195,13 +214,13 @@ public class CanvasApplication extends Application {
         group.getChildren().add(canvas);
 
         javafx.scene.layout.VBox conteneur = new javafx.scene.layout.VBox(15);
-        conteneur.getChildren().addAll(group, btnCombattre);
+        conteneur.getChildren().addAll(group, btnCombattre, journalDeBord);
 
         BorderPane root = new BorderPane(conteneur);
         root.setPadding(new Insets(10));
 
-        Scene scene = new Scene(root, LARGEUR_CANVAS + 20, HAUTEUR_CANVAS + 60, Color.WHITE);
-        stage.setTitle("Bataille Navale");
+        Scene scene = new Scene(root, LARGEUR_CANVAS + 20, HAUTEUR_CANVAS + 160, Color.WHITE);
+        stage.setTitle("Bataille Javale");
         stage.setScene(scene);
         stage.show();
     }
@@ -215,6 +234,7 @@ public class CanvasApplication extends Application {
         gc.setFill(Color.DARKGRAY);
         gc.setStroke(Color.BLACK);
         gc.setLineWidth(2);
+        // On dessine les bateaux du joueur (Grille de gauche)
         for (Bateau b : maGrille.getListeBateaux()) {
             double xPixel = MARGE + (b.getCoordonneeX() * TAILLE_CASE);
             double yPixel = MARGE + (b.getCoordonneeY() * TAILLE_CASE);
@@ -222,45 +242,62 @@ public class CanvasApplication extends Application {
             double hauteur = (b.getOrientation() == Orientation.VERTICAL) ? b.getType().getTaille() * TAILLE_CASE : TAILLE_CASE;
             gc.fillRect(xPixel, yPixel, largeur, hauteur);
             gc.strokeRect(xPixel, yPixel, largeur, hauteur);
-
         }
 
         gc.setLineWidth(1);
         for (BateauGraphique b : flotte) {
             if (!b.estPlace) {
-                if (b == bateauEnCoursDeDrag) {
-                    gc.setFill(Color.rgb(100, 100, 100, 0.7));
-                } else {
-                    gc.setFill(Color.GRAY);
-                }
-
+                gc.setFill((b == bateauEnCoursDeDrag) ? Color.rgb(100, 100, 100, 0.7) : Color.GRAY);
                 double largeur = (b.orientation == Orientation.HORIZONTAL) ? b.type.getTaille() * TAILLE_CASE : TAILLE_CASE;
                 double hauteur = (b.orientation == Orientation.VERTICAL) ? b.type.getTaille() * TAILLE_CASE : TAILLE_CASE;
-
                 gc.fillRect(b.x, b.y, largeur, hauteur);
                 gc.strokeRect(b.x, b.y, largeur, hauteur);
             }
         }
-        monSystemeDeTir.dessinerTirs();
+
+
+        monSystemeDeTir.dessinerTousLesTirs(maGrille, ordi.getSaGrille());
     }
 
     private void dessinerDecor(GraphicsContext gc) {
+        // Fond Eau Gauche
         gc.setFill(Color.LIGHTBLUE);
         gc.fillRect(MARGE, MARGE, TAILLE_GRILLE * TAILLE_CASE, TAILLE_GRILLE * TAILLE_CASE);
+        // Fond Eau Droite
+        gc.fillRect(DECALAGE_RADAR, MARGE, TAILLE_GRILLE * TAILLE_CASE, TAILLE_GRILLE * TAILLE_CASE);
+
         gc.setFont(Font.font("Arial", FontWeight.BOLD, 14));
         gc.setFill(Color.BLACK);
 
         for (int i = 0; i <= TAILLE_GRILLE; i++) {
-            double position = MARGE + (i * TAILLE_CASE);
+            double posG1 = MARGE + (i * TAILLE_CASE);
+            double posG2 = DECALAGE_RADAR + (i * TAILLE_CASE);
             gc.setStroke(Color.BLACK);
-            gc.strokeLine(position, MARGE, position, MARGE + (TAILLE_GRILLE * TAILLE_CASE));
-            gc.strokeLine(MARGE, position, MARGE + (TAILLE_GRILLE * TAILLE_CASE), position);
+
+            // Grille Gauche
+            gc.strokeLine(posG1, MARGE, posG1, MARGE + (TAILLE_GRILLE * TAILLE_CASE));
+            gc.strokeLine(MARGE, posG1, MARGE + (TAILLE_GRILLE * TAILLE_CASE), posG1);
+            // Grille Droite
+            gc.strokeLine(posG2, MARGE, posG2, MARGE + (TAILLE_GRILLE * TAILLE_CASE));
+            gc.strokeLine(DECALAGE_RADAR, posG1, DECALAGE_RADAR + (TAILLE_GRILLE * TAILLE_CASE), posG1);
+
             if (i < TAILLE_GRILLE) {
-                gc.fillText(String.valueOf(i + 1), position + 10, MARGE - 10);
-                gc.fillText(String.valueOf((char) ('A' + i)), MARGE - 20, position + 20);
+                gc.fillText(String.valueOf(i + 1), posG1 + 10, MARGE - 10);
+                gc.fillText(String.valueOf((char) ('A' + i)), MARGE - 20, posG1 + 20);
+                gc.fillText(String.valueOf(i + 1), posG2 + 10, MARGE - 10);
+                gc.fillText(String.valueOf((char) ('A' + i)), DECALAGE_RADAR - 20, posG1 + 20);
             }
         }
-        gc.fillText("(Clic droit sur le bateau pour le tourner)", 30, 360);
-        gc.fillText("Chantier naval: ",30,380);
+
+        if (enPhaseDePlacement) {
+            gc.fillText("VOTRE FLOTTE (Placez vos bateaux)", MARGE, MARGE - 15);
+            gc.fillText("RADAR (Désactivé)", DECALAGE_RADAR, MARGE - 15);
+            gc.fillText("Chantier naval (Clic droit pour tourner): ", 30, 400);
+        } else {
+            gc.setFill(Color.BLUE);
+            gc.fillText("VOTRE FLOTTE (Défense)", MARGE, MARGE - 15);
+            gc.setFill(Color.RED);
+            gc.fillText("RADAR (Cliquez ici pour attaquer !)", DECALAGE_RADAR, MARGE - 15);
+        }
     }
 }
