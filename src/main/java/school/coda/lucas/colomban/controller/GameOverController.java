@@ -24,7 +24,7 @@ public class GameOverController {
     protected void onRetourMenuClick(ActionEvent event) {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("menu-view.fxml"));
-            Scene sceneMenu = new Scene(fxmlLoader.load(), 400, 400);
+            Scene sceneMenu = new Scene(fxmlLoader.load(), 800, 800);
 
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
 

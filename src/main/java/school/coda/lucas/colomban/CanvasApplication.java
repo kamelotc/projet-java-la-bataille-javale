@@ -349,7 +349,7 @@ public class CanvasApplication extends Application {
 
         try {
             javafx.fxml.FXMLLoader fxmlLoader = new javafx.fxml.FXMLLoader(school.coda.lucas.colomban.Main.class.getResource("game-over-view.fxml"));
-            Scene scene = new Scene(fxmlLoader.load(), 500, 400);
+            Scene scene = new Scene(fxmlLoader.load(), 800, 800);
 
             school.coda.lucas.colomban.controller.GameOverController controller = fxmlLoader.getController();
             controller.setWinnerMessage(message);
