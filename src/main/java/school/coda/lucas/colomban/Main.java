@@ -14,6 +14,7 @@ public class Main extends Application {
                 stage.setTitle("Bataille Javale");
         stage.setScene(scene);
         stage.show() ;
+        stage.setFullScreen(true);
     }
 
 }

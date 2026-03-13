@@ -7,13 +7,15 @@
 
 <VBox alignment="CENTER" spacing="30.0" xmlns:fx="http://javafx.com/fxml"
       fx:controller="school.coda.lucas.colomban.controller.GameOverController"
-      style="-fx-background-color: #e0f7fa;"> <padding>
-    <Insets bottom="40.0" left="40.0" right="40.0" top="40.0"/>
-</padding>
+      stylesheets="@style.css"
+      styleClass="menu-fond">
 
-    <Label fx:id="winnerLabel" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #000080;"/>
+    <padding>
+        <Insets bottom="40.0" left="40.0" right="40.0" top="40.0"/>
+    </padding>
 
-    <Button text="Retour au Menu principal" onAction="#onRetourMenuClick"
-            style="-fx-font-size: 16px; -fx-padding: 10px 20px;"/>
+    <Label fx:id="winnerLabel" styleClass="titre-naval" />
+
+    <Button text="Retour au Menu principal" onAction="#onRetourMenuClick" />
 
 </VBox>

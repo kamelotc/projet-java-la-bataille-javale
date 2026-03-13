@@ -3,12 +3,14 @@ package school.coda.lucas.colomban;
 import javafx.application.Application;
 import javafx.animation.PauseTransition;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
@@ -31,7 +33,6 @@ public class CanvasApplication extends Application {
     private javafx.scene.media.AudioClip sonCoule;
     private javafx.scene.media.AudioClip sonRate;
 
-    // Suppression des doublons, on ne garde qu'une seule déclaration !
     private boolean enPhaseDePlacement = true;
     private boolean tourDuJoueur = true;
     private javafx.scene.control.TextArea journalDeBord;
@@ -77,7 +78,17 @@ public class CanvasApplication extends Application {
 
     @Override
     public void start(Stage stage) {
-        // --- CHARGEMENT DE LA MUSIQUE ET DES SONS ---
+        journalDeBord = new javafx.scene.control.TextArea();
+        journalDeBord.setEditable(false);
+        journalDeBord.setPrefHeight(120);
+        // NOUVEAU : On empêche le journal de s'étirer sur tout l'écran !
+        journalDeBord.setMaxWidth(LARGEUR_CANVAS);
+
+        // Le style Hacker / Militaire : fond noir, texte vert fluo !
+        journalDeBord.setStyle("-fx-control-inner-background: #000000; -fx-font-family: 'Courier New'; -fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #00ff00;");
+        journalDeBord.appendText(">> TERMINAL DE COMMANDEMENT ACTIVÉ...\n");
+        journalDeBord.appendText(">> EN ATTENTE DU PLACEMENT DE LA FLOTTE...\n");
+
         java.net.URL cheminMusique = getClass().getResource("/school/coda/lucas/colomban/audio/musique_combat.mp3");
         if (cheminMusique != null) {
             javafx.scene.media.Media media = new javafx.scene.media.Media(cheminMusique.toExternalForm());
@@ -120,12 +131,6 @@ public class CanvasApplication extends Application {
         final Canvas canvas = new Canvas(LARGEUR_CANVAS, HAUTEUR_CANVAS);
         GraphicsContext gc = canvas.getGraphicsContext2D();
         monSystemeDeTir = new SystemeDeTir(gc);
-
-        journalDeBord = new javafx.scene.control.TextArea();
-        journalDeBord.setEditable(false);
-        journalDeBord.setPrefHeight(120);
-        journalDeBord.setStyle("-fx-font-family: monospace; -fx-font-size: 14px; -fx-font-weight: bold;");
-        journalDeBord.appendText(">> Placez vos 5 bateaux sur la grille de gauche.\n");
 
         canvas.setOnMousePressed(event -> {
             if (!enPhaseDePlacement) return;
@@ -203,10 +208,7 @@ public class CanvasApplication extends Application {
 
         canvas.setOnMouseClicked(event -> {
             if (enPhaseDePlacement) return;
-
-            // LA PROTECTION : Si ce n'est pas ton tour, on ignore le clic !
             if (!tourDuJoueur) return;
-
             if (event.getClickCount() > 1) return;
 
             if (event.getButton() == MouseButton.PRIMARY) {
@@ -227,8 +229,7 @@ public class CanvasApplication extends Application {
                         return;
                     }
 
-                    // --- 1. VOUS TIREZ SUR L'ORDI ---
-                    tourDuJoueur = false; // ON VERROUILLE LE JEU, TU NE PEUX PLUS CLIQUER
+                    tourDuJoueur = false;
 
                     boolean aTouche = ordi.getSaGrille().recevoirTir(caseX, caseY);
                     String messageTirJoueur = ordi.getSaGrille().getDernierMessage();
@@ -236,9 +237,8 @@ public class CanvasApplication extends Application {
 
                     if (ordi.getSaGrille().estFlotteCoulee()) {
                         afficherEcranFin("FÉLICITATIONS !\nVous avez détruit la flotte ennemie !", stage);
-                        return; // On arrête tout
+                        return;
                     } else {
-                        // Si la partie continue, on joue les bruitages normaux
                         if (messageTirJoueur.contains("Touché-Coulé")) {
                             if (sonCoule != null) sonCoule.play();
                         } else if (aTouche) {
@@ -250,19 +250,16 @@ public class CanvasApplication extends Application {
 
                     rafraichirEcran(gc);
 
-                    // --- 2. L'ORDI RIPOSTE ---
                     PauseTransition pause = new PauseTransition(Duration.seconds(2));
                     pause.setOnFinished(e -> {
                         ordi.jouerTour(maGrille);
                         String messageTirOrdi = maGrille.getDernierMessage();
                         journalDeBord.appendText("ORDI  : " + messageTirOrdi + "\n\n");
 
-                        // L'ORDI VÉRIFIE S'IL A GAGNÉ
                         if (maGrille.estFlotteCoulee()) {
                             afficherEcranFin("DÉFAITE...\nL'ordinateur a coulé tous vos navires.", stage);
                             return;
                         } else {
-                            // Bruitages normaux pour l'ordi
                             if (messageTirOrdi.contains("Touché-Coulé")) {
                                 if (sonCoule != null) sonCoule.play();
                             } else if (messageTirOrdi.contains("Touché")) {
@@ -273,8 +270,6 @@ public class CanvasApplication extends Application {
                         }
 
                         rafraichirEcran(gc);
-
-                        // L'ORDI A FINI, ON DÉVERROUILLE !
                         tourDuJoueur = true;
                     });
                     pause.play();
@@ -293,10 +288,7 @@ public class CanvasApplication extends Application {
 
             if (tousPlaces) {
                 enPhaseDePlacement = false;
-
-                // L'ordi place ses bateaux
                 ordi.placerBateauxAleatoirement();
-
                 btnCombattre.setText("Bataille en cours...");
                 btnCombattre.setDisable(true);
                 rafraichirEcran(gc);
@@ -308,21 +300,30 @@ public class CanvasApplication extends Application {
         Group group = new Group();
         group.getChildren().add(canvas);
 
-        javafx.scene.layout.VBox conteneur = new javafx.scene.layout.VBox(15);
+        VBox conteneur = new VBox(15);
+        // NOUVEAU : On centre parfaitement le plateau de jeu et la zone de texte à l'écran !
+        conteneur.setAlignment(Pos.CENTER);
         conteneur.getChildren().addAll(group, btnCombattre, journalDeBord);
 
         BorderPane root = new BorderPane(conteneur);
         root.setPadding(new Insets(10));
 
-        Scene scene = new Scene(root, LARGEUR_CANVAS + 20, HAUTEUR_CANVAS + 160, Color.WHITE);
+        Scene scene = new Scene(root, LARGEUR_CANVAS + 20, HAUTEUR_CANVAS + 160);
+        java.net.URL cssUrl = getClass().getResource("/school/coda/lucas/colomban/style.css");
+        if (cssUrl != null) {
+            scene.getStylesheets().add(cssUrl.toExternalForm());
+        }
+
+        root.getStyleClass().add("menu-fond-sot");
+
         stage.setTitle("Bataille Javale");
         stage.setScene(scene);
         stage.show();
+        stage.setFullScreen(true);
     }
 
     private void rafraichirEcran(GraphicsContext gc) {
-        gc.setFill(Color.WHITE);
-        gc.fillRect(0, 0, LARGEUR_CANVAS, HAUTEUR_CANVAS);
+        gc.clearRect(0, 0, LARGEUR_CANVAS, HAUTEUR_CANVAS);
 
         dessinerDecor(gc);
 
@@ -354,32 +355,34 @@ public class CanvasApplication extends Application {
     }
 
     private void dessinerDecor(GraphicsContext gc) {
-        gc.setFill(Color.LIGHTBLUE);
+        gc.setFill(Color.rgb(10, 27, 42, 0.7));
         gc.fillRect(MARGE, MARGE, TAILLE_GRILLE * TAILLE_CASE, TAILLE_GRILLE * TAILLE_CASE);
         gc.fillRect(DECALAGE_RADAR, MARGE, TAILLE_GRILLE * TAILLE_CASE, TAILLE_GRILLE * TAILLE_CASE);
-        gc.setFont(Font.font("Arial", FontWeight.BOLD, 14));
+        gc.setFont(Font.font("Courier New", FontWeight.BOLD, 14));
 
         if (enPhaseDePlacement) {
-            gc.setFill(Color.BLUE);
-            gc.fillText("VOTRE FLOTTE (Placez vos bateaux)", MARGE, MARGE - 30);
-            gc.setFill(Color.RED);
-            gc.fillText("RADAR (Désactivé)", DECALAGE_RADAR, MARGE - 30);
+            gc.setFill(Color.CYAN);
+            gc.fillText("VOTRE FLOTTE (Placez vos bateaux)", MARGE, MARGE - 20);
+            gc.setFill(Color.GRAY);
+            gc.fillText("RADAR (Désactivé)", DECALAGE_RADAR, MARGE - 20);
 
-            gc.setFill(Color.BLACK);
+            gc.setFill(Color.WHITE);
             gc.fillText("Chantier naval (Clic droit pour tourner): ", 50, 400);
         } else {
-            gc.setFill(Color.BLUE);
-            gc.fillText("VOTRE FLOTTE (Défense)", MARGE, MARGE - 30);
-            gc.setFill(Color.RED);
-            gc.fillText("RADAR (Cliquez ici pour attaquer !)", DECALAGE_RADAR, MARGE - 30);
+            gc.setFill(Color.CYAN);
+            gc.fillText("VOTRE FLOTTE (Défense)", MARGE, MARGE - 20);
+            gc.setFill(Color.ORANGE);
+            gc.fillText("RADAR (Cliquez ici pour attaquer !)", DECALAGE_RADAR, MARGE - 20);
         }
 
-        gc.setFill(Color.BLACK);
+        gc.setFill(Color.WHITE);
 
         for (int i = 0; i <= TAILLE_GRILLE; i++) {
             double posG1 = MARGE + (i * TAILLE_CASE);
             double posG2 = DECALAGE_RADAR + (i * TAILLE_CASE);
-            gc.setStroke(Color.BLACK);
+
+            gc.setStroke(Color.web("#00ffcc"));
+            gc.setLineWidth(1.0);
 
             gc.strokeLine(posG1, MARGE, posG1, MARGE + (TAILLE_GRILLE * TAILLE_CASE));
             gc.strokeLine(MARGE, posG1, MARGE + (TAILLE_GRILLE * TAILLE_CASE), posG1);
@@ -410,6 +413,7 @@ public class CanvasApplication extends Application {
 
             stage.setScene(scene);
             stage.setTitle("Fin de la Bataille !");
+            stage.setFullScreen(true);
         } catch (java.io.IOException e) {
             e.printStackTrace();
         }

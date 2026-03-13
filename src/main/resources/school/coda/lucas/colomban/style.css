@@ -1,0 +1,57 @@
+/* Style du fond pour les pages sans image (Crédits, Game Over) */
+.fond-marin {
+    -fx-background-color: linear-gradient(to bottom, #0d1b2a, #1b263b, #415a77);
+}
+
+/* Style général des gros textes (Titres) */
+.titre-naval {
+    -fx-font-size: 28px;
+    -fx-font-family: 'Courier New', monospace; /* Police style machine à écrire / terminal */
+    -fx-font-weight: bold;
+    -fx-text-fill: #00ffcc; /* Cyan tactique */
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 10, 0, 0, 0);
+}
+
+/* Style des textes normaux */
+.texte-naval {
+    -fx-font-size: 16px;
+    -fx-font-family: 'Arial';
+    -fx-text-fill: white;
+}
+
+/* --- LE STYLE DES BOUTONS --- */
+.button {
+    -fx-background-color: linear-gradient(#415a77, #1b263b);
+    -fx-background-radius: 5;
+    -fx-border-color: #778da9;
+    -fx-border-radius: 5;
+    -fx-border-width: 2;
+    -fx-text-fill: white;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-padding: 10 25 10 25;
+    -fx-cursor: hand;
+}
+
+/* Effet quand la souris passe sur le bouton */
+.button:hover {
+    -fx-background-color: linear-gradient(#778da9, #415a77);
+    -fx-border-color: #00ffcc;
+    -fx-text-fill: #00ffcc;
+}
+
+/* Bouton désactivé */
+.button:disabled {
+    -fx-opacity: 0.5;
+    -fx-cursor: default;
+}
+.menu-fond {
+    -fx-background-image: url('image/wow_ocean.jpg');
+    -fx-background-size: cover; /* L'image va s'étirer pour couvrir tout l'écran */
+    -fx-background-position: center center;
+}
+.menu-fond-sot{
+    -fx-background-image: url('image/ocean_sot.jpg');
+    -fx-background-size: cover;
+    -fx-background-position: center center;
+}
