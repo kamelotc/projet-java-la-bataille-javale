@@ -48,6 +48,10 @@ public class CanvasApplication extends Application {
     private JoueurOrdi ordi;
     private SystemeDeTir monSystemeDeTir;
 
+    private int numeroTour = 1;
+    private school.coda.lucas.colomban.succes.GestionnaireSucces gestionnaireSucces =
+            new school.coda.lucas.colomban.succes.GestionnaireSucces("Joueur");
+
     private class BateauGraphique {
         TypeBateau type;
         Orientation orientation = Orientation.HORIZONTAL;
@@ -81,13 +85,10 @@ public class CanvasApplication extends Application {
         journalDeBord = new javafx.scene.control.TextArea();
         journalDeBord.setEditable(false);
         journalDeBord.setPrefHeight(120);
-        // NOUVEAU : On empêche le journal de s'étirer sur tout l'écran !
         journalDeBord.setMaxWidth(LARGEUR_CANVAS);
 
-        // Le style Hacker / Militaire : fond noir, texte vert fluo !
-        journalDeBord.setStyle("-fx-control-inner-background: #000000; -fx-font-family: 'Courier New'; -fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #00ff00;");
-        journalDeBord.appendText(">> TERMINAL DE COMMANDEMENT ACTIVÉ...\n");
-        journalDeBord.appendText(">> EN ATTENTE DU PLACEMENT DE LA FLOTTE...\n");
+        journalDeBord.setStyle("-fx-font-family: monospace; -fx-font-size: 14px; -fx-font-weight: bold;");
+        journalDeBord.appendText(">> Placez vos 5 bateaux sur la grille de gauche.\n");
 
         java.net.URL cheminMusique = getClass().getResource("/school/coda/lucas/colomban/audio/musique_combat.mp3");
         if (cheminMusique != null) {
@@ -230,12 +231,25 @@ public class CanvasApplication extends Application {
                     }
 
                     tourDuJoueur = false;
+                    journalDeBord.appendText("--- TOUR " + numeroTour + " ---\n");
 
                     boolean aTouche = ordi.getSaGrille().recevoirTir(caseX, caseY);
                     String messageTirJoueur = ordi.getSaGrille().getDernierMessage();
                     journalDeBord.appendText("VOUS  : " + messageTirJoueur + "\n");
 
                     if (ordi.getSaGrille().estFlotteCoulee()) {
+
+                        // ON VALIDE LES SUCCÈS ICI
+                        List<String> nouveauxSucces = gestionnaireSucces.validerFinDePartie(true, numeroTour);
+
+                        for (String succes : nouveauxSucces) {
+                            javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
+                            alert.setTitle("Succès Débloqué !");
+                            alert.setHeaderText(null);
+                            alert.setContentText("🏆 Nouveau succès : " + succes + " 🏆");
+                            alert.showAndWait();
+                        }
+
                         afficherEcranFin("FÉLICITATIONS !\nVous avez détruit la flotte ennemie !", stage);
                         return;
                     } else {
@@ -250,13 +264,26 @@ public class CanvasApplication extends Application {
 
                     rafraichirEcran(gc);
 
-                    PauseTransition pause = new PauseTransition(Duration.seconds(2));
+                    PauseTransition pause = new PauseTransition(Duration.seconds(1));
                     pause.setOnFinished(e -> {
                         ordi.jouerTour(maGrille);
                         String messageTirOrdi = maGrille.getDernierMessage();
                         journalDeBord.appendText("ORDI  : " + messageTirOrdi + "\n\n");
 
+                        numeroTour++;
+
                         if (maGrille.estFlotteCoulee()) {
+
+                            List<String> nouveauxSucces = gestionnaireSucces.validerFinDePartie(false, numeroTour);
+
+                            for (String succes : nouveauxSucces) {
+                                javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
+                                alert.setTitle("Succès Débloqué !");
+                                alert.setHeaderText(null);
+                                alert.setContentText("🏆 Nouveau succès : " + succes + " 🏆");
+                                alert.showAndWait();
+                            }
+
                             afficherEcranFin("DÉFAITE...\nL'ordinateur a coulé tous vos navires.", stage);
                             return;
                         } else {
@@ -301,7 +328,6 @@ public class CanvasApplication extends Application {
         group.getChildren().add(canvas);
 
         VBox conteneur = new VBox(15);
-        // NOUVEAU : On centre parfaitement le plateau de jeu et la zone de texte à l'écran !
         conteneur.setAlignment(Pos.CENTER);
         conteneur.getChildren().addAll(group, btnCombattre, journalDeBord);
 

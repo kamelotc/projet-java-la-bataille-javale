@@ -24,7 +24,6 @@ public class GameOverController {
 
     @FXML
     public void initialize() {
-        // 1. On charge et on lance la musique de fond
         URL cheminMusique = getClass().getResource("/school/coda/lucas/colomban/audio/musique_fin.mp3");
         if (cheminMusique != null) {
             Media media = new Media(cheminMusique.toExternalForm());
@@ -34,21 +33,18 @@ public class GameOverController {
             System.out.println("Musique de fin introuvable !");
         }
 
-        // 2. On charge le son de victoire (mais ON NE LE JOUE PAS ENCORE)
         URL cheminSonLast = getClass().getResource("/school/coda/lucas/colomban/audio/gagner.mp3");
         if (cheminSonLast != null) {
             sonLast = new javafx.scene.media.AudioClip(cheminSonLast.toExternalForm());
-            sonLast.setVolume(1.0); // 1.0 = Volume maximum
+            sonLast.setVolume(1.0);
         } else {
             System.out.println("Son gagner.mp3 introuvable !");
         }
     }
 
-    // Méthode appelée par ton CanvasApplication pour afficher le gagnant
     public void setWinnerMessage(String message) {
         winnerLabel.setText(message);
 
-        // 3. LA MAGIE EST ICI : On joue le son de victoire UNIQUEMENT si tu as gagné !
         if (message.contains("FÉLICITATIONS") && sonLast != null) {
             sonLast.play();
         }
@@ -57,7 +53,7 @@ public class GameOverController {
     @FXML
     protected void onRetourMenuClick(ActionEvent event) {
         if (lecteurMusiqueFin != null) {
-            lecteurMusiqueFin.stop(); // On coupe tout en partant
+            lecteurMusiqueFin.stop();
         }
         if (sonLast != null && sonLast.isPlaying()) {
             sonLast.stop();

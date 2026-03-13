@@ -9,7 +9,7 @@ public class SystemeDeTir {
     private static final int TAILLE_GRILLE = 10;
     private static final int TAILLE_CASE = 30;
     private static final int MARGE = 50;
-    private static final int DECALAGE_RADAR = 400; // La position de la 2ème grille
+    private static final int DECALAGE_RADAR = 400;
 
     private GraphicsContext gc;
 
@@ -17,7 +17,6 @@ public class SystemeDeTir {
         this.gc = gc;
     }
 
-    // On dessine les tirs sur TES bateaux, puis sur la grille de l'ORDI
     public void dessinerTousLesTirs(Grille grilleJoueur, Grille grilleOrdi) {
         dessinerTirsGrille(grilleJoueur, MARGE);          // À gauche
         dessinerTirsGrille(grilleOrdi, DECALAGE_RADAR);   // À droite

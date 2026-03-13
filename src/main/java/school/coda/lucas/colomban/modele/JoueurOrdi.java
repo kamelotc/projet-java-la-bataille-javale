@@ -11,7 +11,6 @@ public class JoueurOrdi {
         this.random = new Random();
     }
 
-    // L'ordi place ses 5 bateaux au hasard
     public void placerBateauxAleatoirement() {
         TypeBateau[] types = {
                 TypeBateau.PORTE_AVIONS,

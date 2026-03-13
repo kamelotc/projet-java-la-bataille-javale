@@ -44,9 +44,8 @@ public class Grille {
         listeBateaux.add(bateau);
         return true;
     }
-    /**
-     * Retire un bateau de la grille (pour pouvoir le déplacer).
-     */
+
+
     public void retirerBateau(Bateau bateau) {
         if (bateau != null && listeBateaux.contains(bateau)) {
             listeBateaux.remove(bateau);
@@ -90,7 +89,6 @@ public class Grille {
             int caseX = (bateau.getOrientation() == Orientation.HORIZONTAL) ? startX + i : startX;
             int caseY = (bateau.getOrientation() == Orientation.VERTICAL) ? startY + i : startY;
 
-            // Si la case n'est pas null, c'est qu'il y a déjà un bateau !
             if (ocean[caseY][caseX] != null) {
                 return false;
             }

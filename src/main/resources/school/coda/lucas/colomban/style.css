@@ -47,7 +47,7 @@
 }
 .menu-fond {
     -fx-background-image: url('image/wow_ocean.jpg');
-    -fx-background-size: cover; /* L'image va s'étirer pour couvrir tout l'écran */
+    -fx-background-size: cover;
     -fx-background-position: center center;
 }
 .menu-fond-sot{

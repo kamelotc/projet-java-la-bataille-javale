@@ -17,10 +17,7 @@ import java.net.URL;
 
 public class MenuController {
 
-
-
     @FXML
-
     private static MediaPlayer lecteurMusique;
     public Label welcomeText;
 
@@ -45,7 +42,7 @@ public class MenuController {
     protected void onJouerButtonClick(ActionEvent event) {
         if (lecteurMusique != null) {
             lecteurMusique.stop();
-            lecteurMusique = null; // On le remet à zéro
+            lecteurMusique = null;
         }
 
         Stage nouvelleFenetre = new Stage();
@@ -68,6 +65,16 @@ public class MenuController {
 
     @FXML
     protected void onAchievementButtonClick() {
+        try {
+            javafx.fxml.FXMLLoader fxmlLoader = new javafx.fxml.FXMLLoader(school.coda.lucas.colomban.Main.class.getResource("succes-view.fxml"));
+            javafx.scene.Scene scene = new javafx.scene.Scene(fxmlLoader.load(), 450, 400);
+            javafx.stage.Stage stage = new javafx.stage.Stage();
+            stage.setTitle("Mes Succès");
+            stage.setScene(scene);
+            stage.show();
+        } catch (java.io.IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @FXML

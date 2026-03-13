@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<VBox alignment="TOP_CENTER" spacing="20.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="school.coda.lucas.colomban.controller.SuccesController">
+    <padding>
+        <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+    </padding>
+    <Label text="🏆 Tableau des Succès 🏆" textFill="#d4af37">
+        <font>
+            <Font name="System Bold" size="24.0" />
+        </font>
+    </Label>
+    <VBox fx:id="conteneurSucces" spacing="15.0" alignment="CENTER_LEFT"/>
+</VBox>
