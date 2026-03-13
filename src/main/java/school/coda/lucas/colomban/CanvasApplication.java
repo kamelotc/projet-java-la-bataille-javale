@@ -27,6 +27,15 @@ import java.util.List;
 
 public class CanvasApplication extends Application {
     private MediaPlayer lecteurMusiqueJeu;
+    private javafx.scene.media.AudioClip sonTouche;
+    private javafx.scene.media.AudioClip sonCoule;
+    private javafx.scene.media.AudioClip sonRate;
+
+    // Suppression des doublons, on ne garde qu'une seule déclaration !
+    private boolean enPhaseDePlacement = true;
+    private boolean tourDuJoueur = true;
+    private javafx.scene.control.TextArea journalDeBord;
+
     private static final int TAILLE_GRILLE = 10;
     private static final int TAILLE_CASE = 30;
     private static final int MARGE = 50;
@@ -37,8 +46,6 @@ public class CanvasApplication extends Application {
     private Grille maGrille;
     private JoueurOrdi ordi;
     private SystemeDeTir monSystemeDeTir;
-    private boolean enPhaseDePlacement = true;
-    private javafx.scene.control.TextArea journalDeBord;
 
     private class BateauGraphique {
         TypeBateau type;
@@ -70,6 +77,7 @@ public class CanvasApplication extends Application {
 
     @Override
     public void start(Stage stage) {
+        // --- CHARGEMENT DE LA MUSIQUE ET DES SONS ---
         java.net.URL cheminMusique = getClass().getResource("/school/coda/lucas/colomban/audio/musique_combat.mp3");
         if (cheminMusique != null) {
             javafx.scene.media.Media media = new javafx.scene.media.Media(cheminMusique.toExternalForm());
@@ -79,6 +87,24 @@ public class CanvasApplication extends Application {
             lecteurMusiqueJeu.play();
         } else {
             System.out.println("Musique du jeu introuvable !");
+        }
+
+        java.net.URL cheminSonTouche = getClass().getResource("/school/coda/lucas/colomban/audio/spas-12.mp3");
+        if (cheminSonTouche != null) {
+            sonTouche = new javafx.scene.media.AudioClip(cheminSonTouche.toExternalForm());
+            sonTouche.setVolume(0.8);
+        }
+
+        java.net.URL cheminSonCoule = getClass().getResource("/school/coda/lucas/colomban/audio/bruit-coule.mp3");
+        if (cheminSonCoule != null) {
+            sonCoule = new javafx.scene.media.AudioClip(cheminSonCoule.toExternalForm());
+            sonCoule.setVolume(1.0);
+        }
+
+        java.net.URL cheminSonRate = getClass().getResource("/school/coda/lucas/colomban/audio/bruh.mp3");
+        if (cheminSonRate != null) {
+            sonRate = new javafx.scene.media.AudioClip(cheminSonRate.toExternalForm());
+            sonRate.setVolume(1.0);
         }
 
         maGrille = new Grille();
@@ -178,7 +204,9 @@ public class CanvasApplication extends Application {
         canvas.setOnMouseClicked(event -> {
             if (enPhaseDePlacement) return;
 
-            // 1. SÉCURITÉ ANTI DOUBLE-CLIC : On ignore les clics multiples
+            // LA PROTECTION : Si ce n'est pas ton tour, on ignore le clic !
+            if (!tourDuJoueur) return;
+
             if (event.getClickCount() > 1) return;
 
             if (event.getButton() == MouseButton.PRIMARY) {
@@ -191,7 +219,6 @@ public class CanvasApplication extends Application {
                     int caseX = (int) ((mx - DECALAGE_RADAR) / TAILLE_CASE);
                     int caseY = (int) ((my - MARGE) / TAILLE_CASE);
 
-                    // Anti-triche
                     boolean[][] touches = ordi.getSaGrille().getTirsTouches();
                     boolean[][] rates = ordi.getSaGrille().getTirsRates();
 
@@ -200,27 +227,55 @@ public class CanvasApplication extends Application {
                         return;
                     }
 
-                    ordi.getSaGrille().recevoirTir(caseX, caseY);
-                    journalDeBord.appendText("VOUS  : " + ordi.getSaGrille().getDernierMessage() + "\n");
+                    // --- 1. VOUS TIREZ SUR L'ORDI ---
+                    tourDuJoueur = false; // ON VERROUILLE LE JEU, TU NE PEUX PLUS CLIQUER
+
+                    boolean aTouche = ordi.getSaGrille().recevoirTir(caseX, caseY);
+                    String messageTirJoueur = ordi.getSaGrille().getDernierMessage();
+                    journalDeBord.appendText("VOUS  : " + messageTirJoueur + "\n");
 
                     if (ordi.getSaGrille().estFlotteCoulee()) {
                         afficherEcranFin("FÉLICITATIONS !\nVous avez détruit la flotte ennemie !", stage);
-                        return;
+                        return; // On arrête tout
+                    } else {
+                        // Si la partie continue, on joue les bruitages normaux
+                        if (messageTirJoueur.contains("Touché-Coulé")) {
+                            if (sonCoule != null) sonCoule.play();
+                        } else if (aTouche) {
+                            if (sonTouche != null) sonTouche.play();
+                        } else {
+                            if (sonRate != null) sonRate.play();
+                        }
                     }
 
-                    rafraichirEcran(gc); // On affiche tout de suite le tir du joueur
+                    rafraichirEcran(gc);
 
-                    PauseTransition pause = new PauseTransition(Duration.seconds(0.5));
+                    // --- 2. L'ORDI RIPOSTE ---
+                    PauseTransition pause = new PauseTransition(Duration.seconds(2));
                     pause.setOnFinished(e -> {
                         ordi.jouerTour(maGrille);
-                        journalDeBord.appendText("ORDI  : " + maGrille.getDernierMessage() + "\n\n");
+                        String messageTirOrdi = maGrille.getDernierMessage();
+                        journalDeBord.appendText("ORDI  : " + messageTirOrdi + "\n\n");
 
+                        // L'ORDI VÉRIFIE S'IL A GAGNÉ
                         if (maGrille.estFlotteCoulee()) {
                             afficherEcranFin("DÉFAITE...\nL'ordinateur a coulé tous vos navires.", stage);
                             return;
+                        } else {
+                            // Bruitages normaux pour l'ordi
+                            if (messageTirOrdi.contains("Touché-Coulé")) {
+                                if (sonCoule != null) sonCoule.play();
+                            } else if (messageTirOrdi.contains("Touché")) {
+                                if (sonTouche != null) sonTouche.play();
+                            } else {
+                                if (sonRate != null) sonRate.play();
+                            }
                         }
 
                         rafraichirEcran(gc);
+
+                        // L'ORDI A FINI, ON DÉVERROUILLE !
+                        tourDuJoueur = true;
                     });
                     pause.play();
                 }
@@ -299,7 +354,6 @@ public class CanvasApplication extends Application {
     }
 
     private void dessinerDecor(GraphicsContext gc) {
-
         gc.setFill(Color.LIGHTBLUE);
         gc.fillRect(MARGE, MARGE, TAILLE_GRILLE * TAILLE_CASE, TAILLE_GRILLE * TAILLE_CASE);
         gc.fillRect(DECALAGE_RADAR, MARGE, TAILLE_GRILLE * TAILLE_CASE, TAILLE_GRILLE * TAILLE_CASE);
@@ -341,8 +395,8 @@ public class CanvasApplication extends Application {
             }
         }
     }
-    private void afficherEcranFin(String message, Stage stage) {
 
+    private void afficherEcranFin(String message, Stage stage) {
         if (lecteurMusiqueJeu != null) {
             lecteurMusiqueJeu.stop();
         }

@@ -6,25 +6,66 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 import javafx.stage.Stage;
 import school.coda.lucas.colomban.Main;
 
 import java.io.IOException;
+import java.net.URL;
 
 public class GameOverController {
 
     @FXML
     private Label winnerLabel;
 
+    private MediaPlayer lecteurMusiqueFin;
+    private javafx.scene.media.AudioClip sonLast;
+
+    @FXML
+    public void initialize() {
+        // 1. On charge et on lance la musique de fond
+        URL cheminMusique = getClass().getResource("/school/coda/lucas/colomban/audio/musique_fin.mp3");
+        if (cheminMusique != null) {
+            Media media = new Media(cheminMusique.toExternalForm());
+            lecteurMusiqueFin = new MediaPlayer(media);
+            lecteurMusiqueFin.play();
+        } else {
+            System.out.println("Musique de fin introuvable !");
+        }
+
+        // 2. On charge le son de victoire (mais ON NE LE JOUE PAS ENCORE)
+        URL cheminSonLast = getClass().getResource("/school/coda/lucas/colomban/audio/gagner.mp3");
+        if (cheminSonLast != null) {
+            sonLast = new javafx.scene.media.AudioClip(cheminSonLast.toExternalForm());
+            sonLast.setVolume(1.0); // 1.0 = Volume maximum
+        } else {
+            System.out.println("Son gagner.mp3 introuvable !");
+        }
+    }
+
+    // Méthode appelée par ton CanvasApplication pour afficher le gagnant
     public void setWinnerMessage(String message) {
         winnerLabel.setText(message);
+
+        // 3. LA MAGIE EST ICI : On joue le son de victoire UNIQUEMENT si tu as gagné !
+        if (message.contains("FÉLICITATIONS") && sonLast != null) {
+            sonLast.play();
+        }
     }
 
     @FXML
     protected void onRetourMenuClick(ActionEvent event) {
+        if (lecteurMusiqueFin != null) {
+            lecteurMusiqueFin.stop(); // On coupe tout en partant
+        }
+        if (sonLast != null && sonLast.isPlaying()) {
+            sonLast.stop();
+        }
+
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("menu-view.fxml"));
-            Scene sceneMenu = new Scene(fxmlLoader.load(), 800, 800);
+            Scene sceneMenu = new Scene(fxmlLoader.load(), 400, 400);
 
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
 
