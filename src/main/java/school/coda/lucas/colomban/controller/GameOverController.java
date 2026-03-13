@@ -61,12 +61,13 @@ public class GameOverController {
 
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("menu-view.fxml"));
-            Scene sceneMenu = new Scene(fxmlLoader.load(), 400, 400);
+            Scene sceneMenu = new Scene(fxmlLoader.load(), 800, 800);
 
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
 
             stage.setScene(sceneMenu);
             stage.setTitle("Bataille Javale");
+            stage.setFullScreen(true); // <-- ET ON FORCE LE PLEIN ÉCRAN ICI AUSSI !
         } catch (IOException e) {
             e.printStackTrace();
         }
