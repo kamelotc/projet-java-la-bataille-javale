@@ -1,7 +1,6 @@
 module school.coda.lucas.colomban {
     requires javafx.controls;
     requires javafx.fxml;
-    requires java.desktop;
     requires javafx.media;
     requires java.sql;
 

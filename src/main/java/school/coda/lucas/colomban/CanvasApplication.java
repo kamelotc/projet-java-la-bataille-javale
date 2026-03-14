@@ -52,7 +52,7 @@ public class CanvasApplication extends Application {
     private school.coda.lucas.colomban.succes.GestionnaireSucces gestionnaireSucces =
             new school.coda.lucas.colomban.succes.GestionnaireSucces("Joueur");
 
-    private class BateauGraphique {
+    private static class BateauGraphique {
         TypeBateau type;
         Orientation orientation = Orientation.HORIZONTAL;
         double x, y, startX, startY;
@@ -186,8 +186,8 @@ public class CanvasApplication extends Application {
         canvas.setOnMouseReleased(event -> {
             if (!enPhaseDePlacement) return;
             if (bateauEnCoursDeDrag != null) {
-                int caseX = (int) ((bateauEnCoursDeDrag.x + (TAILLE_CASE / 2) - MARGE) / TAILLE_CASE);
-                int caseY = (int) ((bateauEnCoursDeDrag.y + (TAILLE_CASE / 2) - MARGE) / TAILLE_CASE);
+                int caseX = (int) ((bateauEnCoursDeDrag.x + (TAILLE_CASE / 2.0) - MARGE) / TAILLE_CASE);
+                int caseY = (int) ((bateauEnCoursDeDrag.y + (TAILLE_CASE / 2.0) - MARGE) / TAILLE_CASE);
 
                 Bateau bateauTest = new Bateau(bateauEnCoursDeDrag.type, bateauEnCoursDeDrag.orientation, caseX, caseY);
 
@@ -239,16 +239,8 @@ public class CanvasApplication extends Application {
 
                     if (ordi.getSaGrille().estFlotteCoulee()) {
 
-                        // ON VALIDE LES SUCCÈS ICI
                         List<String> nouveauxSucces = gestionnaireSucces.validerFinDePartie(true, numeroTour);
-
-                        for (String succes : nouveauxSucces) {
-                            javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
-                            alert.setTitle("Succès Débloqué !");
-                            alert.setHeaderText(null);
-                            alert.setContentText("🏆 Nouveau succès : " + succes + " 🏆");
-                            alert.showAndWait();
-                        }
+                        afficherAlertesSucces(nouveauxSucces);
 
                         afficherEcranFin("FÉLICITATIONS !\nVous avez détruit la flotte ennemie !", stage);
                         return;
@@ -275,14 +267,7 @@ public class CanvasApplication extends Application {
                         if (maGrille.estFlotteCoulee()) {
 
                             List<String> nouveauxSucces = gestionnaireSucces.validerFinDePartie(false, numeroTour);
-
-                            for (String succes : nouveauxSucces) {
-                                javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
-                                alert.setTitle("Succès Débloqué !");
-                                alert.setHeaderText(null);
-                                alert.setContentText("🏆 Nouveau succès : " + succes + " 🏆");
-                                alert.showAndWait();
-                            }
+                            afficherAlertesSucces(nouveauxSucces);
 
                             afficherEcranFin("DÉFAITE...\nL'ordinateur a coulé tous vos navires.", stage);
                             return;
@@ -310,7 +295,10 @@ public class CanvasApplication extends Application {
         btnCombattre.setOnAction(e -> {
             boolean tousPlaces = true;
             for (BateauGraphique b : flotte) {
-                if (!b.estPlace) tousPlaces = false;
+                if (!b.estPlace){
+                    tousPlaces = false;
+                    break;
+                }
             }
 
             if (tousPlaces) {
@@ -345,6 +333,7 @@ public class CanvasApplication extends Application {
         stage.setTitle("Bataille Javale");
         stage.setScene(scene);
         stage.show();
+        stage.setFullScreenExitHint("");
         stage.setFullScreen(true);
     }
 
@@ -439,9 +428,19 @@ public class CanvasApplication extends Application {
 
             stage.setScene(scene);
             stage.setTitle("Fin de la Bataille !");
+            stage.setFullScreenExitHint("");
             stage.setFullScreen(true);
         } catch (java.io.IOException e) {
-            e.printStackTrace();
+            System.err.println("Erreur lors du chargement de l'écran de fin : " + e.getMessage());        }
+    }
+
+    private void afficherAlertesSucces(List<String> nouveauxSucces) {
+        for (String succes : nouveauxSucces) {
+            javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
+            alert.setTitle("Succès Débloqué !");
+            alert.setHeaderText(null);
+            alert.setContentText("🏆 Nouveau succès : " + succes + " 🏆");
+            alert.showAndWait();
         }
     }
 

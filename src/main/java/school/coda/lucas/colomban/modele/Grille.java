@@ -5,11 +5,12 @@ import java.util.List;
 
 public class Grille {
     public static final int TAILLE = 10;
-    private Bateau[][] ocean;
-    private List<Bateau> listeBateaux;
 
-    private boolean[][] tirsRates;
-    private boolean[][] tirsTouches;
+    private final Bateau[][] ocean;
+    private final List<Bateau> listeBateaux;
+    private final boolean[][] tirsRates;
+    private final boolean[][] tirsTouches;
+
     private String dernierMessage = "";
 
     public Grille() {
@@ -18,7 +19,6 @@ public class Grille {
         this.tirsRates = new boolean[TAILLE][TAILLE];
         this.tirsTouches = new boolean[TAILLE][TAILLE];
     }
-
     public String getDernierMessage() {
         return dernierMessage;
     }
@@ -63,15 +63,13 @@ public class Grille {
             }
         }
     }
-    /**
-     * Vérifie si le bateau respecte les limites et ne chevauche pas un autre bateau.
-     */
+
     private boolean estPlacementValide(Bateau bateau) {
         int taille = bateau.getType().getTaille();
         int startX = bateau.getCoordonneeX();
         int startY = bateau.getCoordonneeY();
 
-        if (startX < 0 || startY < 0) {
+        if (startX < 0 || startY < 0 || startX >= TAILLE || startY >= TAILLE) {
             return false;
         }
 
@@ -84,7 +82,6 @@ public class Grille {
                 return false;
             }
         }
-
         for (int i = 0; i < taille; i++) {
             int caseX = (bateau.getOrientation() == Orientation.HORIZONTAL) ? startX + i : startX;
             int caseY = (bateau.getOrientation() == Orientation.VERTICAL) ? startY + i : startY;
@@ -93,7 +90,6 @@ public class Grille {
                 return false;
             }
         }
-
 
         return true;
     }

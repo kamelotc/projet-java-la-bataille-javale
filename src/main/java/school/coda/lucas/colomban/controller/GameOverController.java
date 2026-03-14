@@ -69,7 +69,6 @@ public class GameOverController {
             stage.setTitle("Bataille Javale");
             stage.setFullScreen(true); // <-- ET ON FORCE LE PLEIN ÉCRAN ICI AUSSI !
         } catch (IOException e) {
-            e.printStackTrace();
-        }
+            System.err.println("Erreur lors du retour au menu : " + e.getMessage());        }
     }
 }

@@ -33,7 +33,7 @@ public class MenuController {
                 lecteurMusique.setCycleCount(MediaPlayer.INDEFINITE);
                 lecteurMusique.play();
             } else {
-                System.out.println("Fichier audio introuvable ! Vérifie qu'il est bien dans le dossier resources.");
+                System.err.println("Fichier audio introuvable ! Vérifie qu'il est bien dans le dossier resources.");
             }
         }
     }
@@ -44,69 +44,38 @@ public class MenuController {
             lecteurMusique.stop();
             lecteurMusique = null;
         }
-
-        Stage nouvelleFenetre = new Stage();
-
-        nouvelleFenetre.setWidth(850);
-        nouvelleFenetre.setHeight(750);
-        nouvelleFenetre.setMinWidth(850);
-        nouvelleFenetre.setMinHeight(750);
-        nouvelleFenetre.setWidth(600);
-        nouvelleFenetre.setHeight(600);
-        nouvelleFenetre.setMinWidth(600);
-        nouvelleFenetre.setMinHeight(600);
-
+        Stage stageActuel = (Stage) ((Node) event.getSource()).getScene().getWindow();
         CanvasApplication monJeu = new CanvasApplication();
-        monJeu.start(nouvelleFenetre);
-
-        Stage menu = (Stage) ((Node) event.getSource()).getScene().getWindow();
-        menu.close();
+        monJeu.start(stageActuel);
     }
 
     @FXML
-    protected void onAchievementButtonClick() {
-        try {
-            javafx.fxml.FXMLLoader fxmlLoader = new javafx.fxml.FXMLLoader(school.coda.lucas.colomban.Main.class.getResource("succes-view.fxml"));
-            javafx.scene.Scene scene = new javafx.scene.Scene(fxmlLoader.load(), 450, 400);
-            javafx.stage.Stage stage = new javafx.stage.Stage();
-            stage.setTitle("Mes Succès");
-            stage.setScene(scene);
-            stage.show();
-        } catch (java.io.IOException e) {
-            e.printStackTrace();
-        }
+    protected void onAchievementButtonClick(ActionEvent event) {
+        changerScene(event, "succes-view.fxml", "Bataille Javale - Mes Succès");
     }
 
     @FXML
     protected void onCreditsButtonClick(ActionEvent event) {
-        try {
-            FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("credits-view.fxml"));
-            Scene sceneCredits = new Scene(fxmlLoader.load(), 800, 800);
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-
-            stage.setScene(sceneCredits);
-            stage.setTitle("Bataille Javale - Crédits");
-
-        } catch (IOException e) {
-            System.out.println("Impossible de charger la page des crédits");
-            e.printStackTrace();
-        }
+        changerScene(event, "credits-view.fxml", "Bataille Javale - Crédits");
     }
 
     @FXML
     protected void onRetourButtonClick(ActionEvent event) {
+        changerScene(event, "menu-view.fxml", "Bataille Javale");
+    }
+
+
+    private void changerScene(ActionEvent event, String fichierFxml, String titre) {
         try {
-            FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("menu-view.fxml"));
-            Scene sceneMenu = new Scene(fxmlLoader.load(), 800, 800);
-
+            FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource(fichierFxml));
+            javafx.scene.Parent nouveauDecor = fxmlLoader.load();
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-
-            stage.setScene(sceneMenu);
-            stage.setTitle("Bataille Javale");
+            Scene sceneActuelle = stage.getScene();
+            sceneActuelle.setRoot(nouveauDecor);
+            stage.setTitle(titre);
 
         } catch (IOException e) {
-            System.out.println("Impossible de charger le menu principal");
-            e.printStackTrace();
+            System.err.println("Impossible de charger la page " + fichierFxml + " : " + e.getMessage());
         }
     }
 }
