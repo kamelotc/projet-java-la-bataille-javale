@@ -493,7 +493,8 @@ public class CanvasApplication {
         private AudioClip sonRate;
 
         public LecteurMusiqueJeu() {
-            URL cheminMusique = LecteurMusiqueJeu.class.getResource("/school/coda/lucas/colomban/audio/musique_combat.mp3");
+            String s = "musique_combat.mp3";
+            URL cheminMusique = LecteurMusiqueJeu.class.getResource("/school/coda/lucas/colomban/audio/" + s);
             if (cheminMusique != null) {
                 Media media = new Media(cheminMusique.toExternalForm());
                 lecteurMusiqueJeu = new MediaPlayer(media);
@@ -504,19 +505,22 @@ public class CanvasApplication {
                 System.out.println("Musique du jeu introuvable !");
             }
 
-            URL cheminSonTouche = LecteurMusiqueJeu.class.getResource("/school/coda/lucas/colomban/audio/spas-12.mp3");
+            String s1 = "spas-12.mp3";
+            URL cheminSonTouche = LecteurMusiqueJeu.class.getResource("/school/coda/lucas/colomban/audio/" + s1);
             if (cheminSonTouche != null) {
                 sonTouche = new AudioClip(cheminSonTouche.toExternalForm());
                 sonTouche.setVolume(0.8);
             }
 
-            URL cheminSonCoule = LecteurMusiqueJeu.class.getResource("/school/coda/lucas/colomban/audio/bruit-coule.mp3");
+            String s2 = "bruit-coule.mp3";
+            URL cheminSonCoule = LecteurMusiqueJeu.class.getResource("/school/coda/lucas/colomban/audio/" + s2);
             if (cheminSonCoule != null) {
                 sonCoule = new AudioClip(cheminSonCoule.toExternalForm());
                 sonCoule.setVolume(1.0);
             }
 
-            URL cheminSonRate = LecteurMusiqueJeu.class.getResource("/school/coda/lucas/colomban/audio/bruh.mp3");
+            String s3 = "bruh.mp3";
+            URL cheminSonRate = LecteurMusiqueJeu.class.getResource("/school/coda/lucas/colomban/audio/" + s3);
             if (cheminSonRate != null) {
                 sonRate = new AudioClip(cheminSonRate.toExternalForm());
                 sonRate.setVolume(1.0);
