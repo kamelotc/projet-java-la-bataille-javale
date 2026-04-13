@@ -35,13 +35,9 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class CanvasApplication {
-
-    private MediaPlayer lecteurMusiqueJeu;
-    private AudioClip sonTouche;
-    private AudioClip sonCoule;
-    private AudioClip sonRate;
 
     private boolean enPhaseDePlacement = true;
     private boolean tourDuJoueur = true;
@@ -65,8 +61,7 @@ public class CanvasApplication {
     private SystemeDeTir monSystemeDeTir;
 
     private int numeroTour = 1;
-    private GestionnaireSucces gestionnaireSucces =
-            new GestionnaireSucces("Joueur");
+    private GestionnaireSucces gestionnaireSucces = new GestionnaireSucces("Joueur");
 
     private List<BateauGraphique> flotte;
 
@@ -231,7 +226,7 @@ public class CanvasApplication {
         String messageTirJoueur = ordi.getDernierMessage();
         journalDeBord.appendTir("VOUS", messageTirJoueur);
 
-        lecteur.playSoundForAction(messageTirJoueur, aTouche, this);
+        lecteur.playSoundForAction(messageTirJoueur, aTouche);
 
         rafraichirEcran(gc);
     }
@@ -253,7 +248,7 @@ public class CanvasApplication {
             return;
         }
 
-        lecteur.playSoundForAction(messageTirOrdi, messageTirOrdi.contains("Touché"), this);
+        lecteur.playSoundForAction(messageTirOrdi, messageTirOrdi.contains("Touché"));
 
         rafraichirEcran(gc);
         tourDuJoueur = true;
@@ -485,7 +480,8 @@ public class CanvasApplication {
             this.y = y;
         }
     }
-    private static class LecteurMusiqueJeu{
+
+    private static class LecteurMusiqueJeu {
 
         private MediaPlayer lecteurMusiqueJeu;
         private AudioClip sonTouche;
@@ -493,48 +489,63 @@ public class CanvasApplication {
         private AudioClip sonRate;
 
         public LecteurMusiqueJeu() {
-            URL cheminMusique = getAudioFileUrl("musique_combat.mp3");
-            if (cheminMusique != null) {
-                Media media = new Media(cheminMusique.toExternalForm());
+            loadMedia("musique_combat.mp3").ifPresent(media -> {
                 lecteurMusiqueJeu = new MediaPlayer(media);
                 lecteurMusiqueJeu.setCycleCount(MediaPlayer.INDEFINITE);
                 lecteurMusiqueJeu.setVolume(0.4);
                 lecteurMusiqueJeu.play();
-            } else {
-                System.out.println("Musique du jeu introuvable !");
-            }
+            });
 
-            URL cheminSonTouche = getAudioFileUrl("spas-12.mp3");
-            if (cheminSonTouche != null) {
-                sonTouche = new AudioClip(cheminSonTouche.toExternalForm());
+            loadSound("spas-12.mp3").ifPresent(audioClip -> {
+                sonTouche = audioClip;
                 sonTouche.setVolume(0.8);
-            }
+            });
 
-            URL cheminSonCoule = getAudioFileUrl("bruit-coule.mp3");
-            if (cheminSonCoule != null) {
-                sonCoule = new AudioClip(cheminSonCoule.toExternalForm());
+            loadSound("bruit-coule.mp3").ifPresent(audioClip -> {
+                sonCoule = audioClip;
                 sonCoule.setVolume(1.0);
-            }
+            });
 
-            URL cheminSonRate = getAudioFileUrl("bruh.mp3");
-            if (cheminSonRate != null) {
-                sonRate = new AudioClip(cheminSonRate.toExternalForm());
+            loadSound("bruh.mp3").ifPresent(audioClip -> {
+                sonRate = audioClip;
                 sonRate.setVolume(1.0);
-            }
+            });
         }
 
-        private URL getAudioFileUrl(String s) {
-            return LecteurMusiqueJeu.class.getResource("/school/coda/lucas/colomban/audio/" + s);
-        }
-
-        private void playSoundForAction(String messageTirJoueur, boolean aTouche, CanvasApplication canvasApplication) {
+        public void playSoundForAction(String messageTirJoueur, boolean aTouche) {
             if (messageTirJoueur.contains("Touché-Coulé")) {
-                if (canvasApplication.sonCoule != null) canvasApplication.sonCoule.play();
+                playSon(sonCoule);
             } else if (aTouche) {
-                if (canvasApplication.sonTouche != null) canvasApplication.sonTouche.play();
+                playSon(sonTouche);
             } else {
-                if (canvasApplication.sonRate != null) canvasApplication.sonRate.play();
+                playSon(sonRate);
             }
+        }
+
+        private Optional<AudioClip> loadSound(String sound) {
+            Optional<AudioClip> audioClip = getAudioFileUrl(sound).map(url -> new AudioClip(url.toExternalForm()));
+            if (audioClip.isEmpty()) {
+                System.err.println("Effet sonore introuvable : " + sound);
+            }
+            return audioClip;
+        }
+
+        private void playSon(AudioClip son) {
+            if (son != null) son.play();
+        }
+
+        private Optional<Media> loadMedia(String music) {
+            Optional<Media> media = getAudioFileUrl(music)
+                    .map(url -> new Media(url.toExternalForm()));
+            if (media.isEmpty()) {
+                System.err.println("Musique du jeu introuvable : " + music);
+            }
+            return media;
+        }
+
+        private Optional<URL> getAudioFileUrl(String audioFileName) {
+            URL resource = LecteurMusiqueJeu.class.getResource("/school/coda/lucas/colomban/audio/" + audioFileName);
+            return Optional.ofNullable(resource);
         }
     }
 }
