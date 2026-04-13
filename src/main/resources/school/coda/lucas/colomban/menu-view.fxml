@@ -15,8 +15,6 @@
 
     <Label styleClass="titre-naval" text="LA BATAILLE JAVALE" />
 
-    <Label fx:id="welcomeText" />
-
     <Button onAction="#onJouerButtonClick" text="Jouer" />
     <Button onAction="#onAchievementButtonClick" text="Mes Succès" />
     <Button onAction="#onCreditsButtonClick" text="Crédits" />
