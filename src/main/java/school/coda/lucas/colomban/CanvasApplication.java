@@ -73,12 +73,13 @@ public class CanvasApplication {
     private BateauGraphique bateauEnCoursDeDrag = null;
     private double dragOffsetX = 0;
     private double dragOffsetY = 0;
+    private LecteurMusiqueJeu lecteur;
 
     public void start(Stage stage) {
         journalDeBord = new JournalDeBord();
         journalDeBord.appendText("Placez vos 5 bateaux sur la grille de gauche.");
         initSoundBox();
-
+        this.lecteur = new LecteurMusiqueJeu();
         maGrille = new Grille();
         ordi = new JoueurOrdi();
 
@@ -262,19 +263,9 @@ public class CanvasApplication {
         String messageTirJoueur = ordi.getDernierMessage();
         journalDeBord.appendTir("VOUS", messageTirJoueur);
 
-        playSoundForAction(messageTirJoueur, aTouche);
+        lecteur.playSoundForAction(messageTirJoueur, aTouche, this);
 
         rafraichirEcran(gc);
-    }
-
-    private void playSoundForAction(String messageTirJoueur, boolean aTouche) {
-        if (messageTirJoueur.contains("Touché-Coulé")) {
-            if (sonCoule != null) sonCoule.play();
-        } else if (aTouche) {
-            if (sonTouche != null) sonTouche.play();
-        } else {
-            if (sonRate != null) sonRate.play();
-        }
     }
 
     private void tirDeLOrdi(Stage stage, GraphicsContext gc) {
@@ -294,7 +285,7 @@ public class CanvasApplication {
             return;
         }
 
-        playSoundForAction(messageTirOrdi, messageTirOrdi.contains("Touché"));
+        lecteur.playSoundForAction(messageTirOrdi, messageTirOrdi.contains("Touché"), this);
 
         rafraichirEcran(gc);
         tourDuJoueur = true;
@@ -528,6 +519,15 @@ public class CanvasApplication {
     }
     private class LecteurMusiqueJeu{
 
+        private void playSoundForAction(String messageTirJoueur, boolean aTouche, CanvasApplication canvasApplication) {
+            if (messageTirJoueur.contains("Touché-Coulé")) {
+                if (canvasApplication.sonCoule != null) canvasApplication.sonCoule.play();
+            } else if (aTouche) {
+                if (canvasApplication.sonTouche != null) canvasApplication.sonTouche.play();
+            } else {
+                if (canvasApplication.sonRate != null) canvasApplication.sonRate.play();
+            }
+        }
     }
 }
 
