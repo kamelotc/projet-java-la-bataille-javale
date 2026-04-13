@@ -76,34 +76,7 @@ public class CanvasApplication {
     public void start(Stage stage) {
         journalDeBord = new JournalDeBord();
         journalDeBord.appendText("Placez vos 5 bateaux sur la grille de gauche.");
-        URL cheminMusique = getClass().getResource("/school/coda/lucas/colomban/audio/musique_combat.mp3");
-        if (cheminMusique != null) {
-            Media media = new Media(cheminMusique.toExternalForm());
-            lecteurMusiqueJeu = new MediaPlayer(media);
-            lecteurMusiqueJeu.setCycleCount(MediaPlayer.INDEFINITE);
-            lecteurMusiqueJeu.setVolume(0.4);
-            lecteurMusiqueJeu.play();
-        } else {
-            System.out.println("Musique du jeu introuvable !");
-        }
-
-        URL cheminSonTouche = getClass().getResource("/school/coda/lucas/colomban/audio/spas-12.mp3");
-        if (cheminSonTouche != null) {
-            sonTouche = new AudioClip(cheminSonTouche.toExternalForm());
-            sonTouche.setVolume(0.8);
-        }
-
-        URL cheminSonCoule = getClass().getResource("/school/coda/lucas/colomban/audio/bruit-coule.mp3");
-        if (cheminSonCoule != null) {
-            sonCoule = new AudioClip(cheminSonCoule.toExternalForm());
-            sonCoule.setVolume(1.0);
-        }
-
-        URL cheminSonRate = getClass().getResource("/school/coda/lucas/colomban/audio/bruh.mp3");
-        if (cheminSonRate != null) {
-            sonRate = new AudioClip(cheminSonRate.toExternalForm());
-            sonRate.setVolume(1.0);
-        }
+        initSoundBox();
 
         maGrille = new Grille();
         ordi = new JoueurOrdi();
@@ -229,6 +202,37 @@ public class CanvasApplication {
         stage.show();
         stage.setFullScreenExitHint("");
         stage.setFullScreen(true);
+    }
+
+    private void initSoundBox() {
+        URL cheminMusique = getClass().getResource("/school/coda/lucas/colomban/audio/musique_combat.mp3");
+        if (cheminMusique != null) {
+            Media media = new Media(cheminMusique.toExternalForm());
+            lecteurMusiqueJeu = new MediaPlayer(media);
+            lecteurMusiqueJeu.setCycleCount(MediaPlayer.INDEFINITE);
+            lecteurMusiqueJeu.setVolume(0.4);
+            lecteurMusiqueJeu.play();
+        } else {
+            System.out.println("Musique du jeu introuvable !");
+        }
+
+        URL cheminSonTouche = getClass().getResource("/school/coda/lucas/colomban/audio/spas-12.mp3");
+        if (cheminSonTouche != null) {
+            sonTouche = new AudioClip(cheminSonTouche.toExternalForm());
+            sonTouche.setVolume(0.8);
+        }
+
+        URL cheminSonCoule = getClass().getResource("/school/coda/lucas/colomban/audio/bruit-coule.mp3");
+        if (cheminSonCoule != null) {
+            sonCoule = new AudioClip(cheminSonCoule.toExternalForm());
+            sonCoule.setVolume(1.0);
+        }
+
+        URL cheminSonRate = getClass().getResource("/school/coda/lucas/colomban/audio/bruh.mp3");
+        if (cheminSonRate != null) {
+            sonRate = new AudioClip(cheminSonRate.toExternalForm());
+            sonRate.setVolume(1.0);
+        }
     }
 
     private void tirDuJoueur(MouseEvent event, GraphicsContext gc) {
