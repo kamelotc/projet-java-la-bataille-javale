@@ -162,7 +162,10 @@ public class GameController {
         if (event.getClickCount() > 1) return;
         if (event.getButton() != MouseButton.PRIMARY) return;
 
-        tirDuJoueur(event);
+        boolean tirEnvoye = tirDuJoueur(event);
+        if (!tirEnvoye) {
+            return;
+        }
         if (ordi.estVaincu()) {
             List<String> nouveauxSucces = gestionnaireSucces.validerFinDePartie(true, numeroTour);
             afficherAlertesSucces(nouveauxSucces);
@@ -220,7 +223,7 @@ public class GameController {
         }
     }
 
-    private void tirDuJoueur(MouseEvent event) {
+    private boolean tirDuJoueur(MouseEvent event) {
         double mx = event.getX();
         double my = event.getY();
 
@@ -228,7 +231,7 @@ public class GameController {
                              !(my >= MARGE) || !(my < MARGE + (TAILLE_GRILLE * TAILLE_CASE));
 
         if (horsGrille) {
-            return;
+            return false;
         }
 
         int caseX = (int) ((mx - DECALAGE_RADAR) / TAILLE_CASE);
@@ -236,7 +239,7 @@ public class GameController {
 
         if (ordi.isDejaCible(caseY, caseX)) {
             journalDeBord.appendText("ATTENTION : Case " + (char) ('A' + caseY) + "-" + (caseX + 1) + " déjà ciblée ! Tir annulé.");
-            return;
+            return false;
         }
 
         tourDuJoueur = false;
@@ -249,6 +252,7 @@ public class GameController {
         lecteur.playSoundForAction(messageTirJoueur, aTouche);
 
         rafraichirEcran();
+        return true;
     }
 
     private void tirDeLOrdi() {
