@@ -488,6 +488,11 @@ public class CanvasApplication {
     }
     private static class LecteurMusiqueJeu{
 
+        private MediaPlayer lecteurMusiqueJeu;
+        private AudioClip sonTouche;
+        private AudioClip sonCoule;
+        private AudioClip sonRate;
+
         private void playSoundForAction(String messageTirJoueur, boolean aTouche, CanvasApplication canvasApplication) {
             if (messageTirJoueur.contains("Touché-Coulé")) {
                 if (canvasApplication.sonCoule != null) canvasApplication.sonCoule.play();
