@@ -5,7 +5,6 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.Label;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.stage.Stage;
@@ -41,9 +40,14 @@ public class MenuController {
             lecteurMusique.stop();
             lecteurMusique = null;
         }
-        Stage stageActuel = (Stage) ((Node) event.getSource()).getScene().getWindow();
-        CanvasApplication monJeu = new CanvasApplication();
-        monJeu.start(stageActuel);
+        Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+        CanvasApplication monJeu = new CanvasApplication(stage);
+        Scene scene = monJeu.getScene();
+        stage.setTitle("Bataille Javale");
+        stage.setScene(scene);
+        stage.show();
+        stage.setFullScreenExitHint("");
+        stage.setFullScreen(true);
     }
 
     @FXML

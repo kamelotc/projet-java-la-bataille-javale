@@ -34,11 +34,17 @@ import java.util.List;
 
 public class CanvasApplication {
 
+    private final Stage stage;
+    private final Canvas canvas;
+    private final GraphicsContext gc;
+
+    private Scene scene;
+
     private boolean enPhaseDePlacement = true;
     private boolean tourDuJoueur = true;
     private JournalDeBord journalDeBord;
-
     private static final int TAILLE_GRILLE = 10;
+
     public static final int TAILLE_CASE = 30;
     /**
      * Marge de la taille d'une case pour y mettre nos lettres et chiffres
@@ -50,22 +56,28 @@ public class CanvasApplication {
     private static final int DECALAGE_RADAR = 400;
     private static final int LARGEUR_CANVAS = 800;
     private static final int HAUTEUR_CANVAS = 600;
-
     private Grille maGrille;
+
     private JoueurOrdi ordi;
     private SystemeDeTir monSystemeDeTir;
-
     private int numeroTour = 1;
-    private GestionnaireSucces gestionnaireSucces = new GestionnaireSucces("Joueur");
 
+    private GestionnaireSucces gestionnaireSucces = new GestionnaireSucces("Joueur");
     private List<BateauGraphique> flotte;
 
     private BateauGraphique bateauEnCoursDeDrag = null;
+
     private double dragOffsetX = 0;
     private double dragOffsetY = 0;
     private LecteurMusiqueJeu lecteur;
+    public CanvasApplication(Stage stage) {
+        this.stage = stage;
+        canvas = new Canvas(LARGEUR_CANVAS, HAUTEUR_CANVAS);
+        gc = canvas.getGraphicsContext2D();
+        this.scene = createScene();
+    }
 
-    public void start(Stage stage) {
+    private Scene createScene() {
         journalDeBord = new JournalDeBord(LARGEUR_CANVAS);
         journalDeBord.appendText("Placez vos 5 bateaux sur la grille de gauche.");
         lecteur = new LecteurMusiqueJeu();
@@ -81,8 +93,7 @@ public class CanvasApplication {
         flotte.add(new BateauGraphique(TypeBateau.SOUS_MARIN, 200, 470));
         flotte.add(new BateauGraphique(TypeBateau.PATROUILLEUR, 200, 520));
 
-        final Canvas canvas = new Canvas(LARGEUR_CANVAS, HAUTEUR_CANVAS);
-        GraphicsContext gc = canvas.getGraphicsContext2D();
+
         monSystemeDeTir = new SystemeDeTir(gc);
 
         canvas.setOnMousePressed(event -> {
@@ -103,7 +114,7 @@ public class CanvasApplication {
                             dragOffsetY = my - bateau.y;
                         }
                     }
-                    rafraichirEcran(gc);
+                    rafraichirEcran();
                     break;
                 }
             }
@@ -115,7 +126,7 @@ public class CanvasApplication {
                 double x = event.getX() - dragOffsetX;
                 double y = event.getY() - dragOffsetY;
                 bateauEnCoursDeDrag.moveToPosition(x, y);
-                rafraichirEcran(gc);
+                rafraichirEcran();
             }
         });
 
@@ -124,7 +135,7 @@ public class CanvasApplication {
             if (bateauEnCoursDeDrag != null) {
                 bateauEnCoursDeDrag.placerSur(maGrille);
                 bateauEnCoursDeDrag = null;
-                rafraichirEcran(gc);
+                rafraichirEcran();
             }
         });
 
@@ -134,25 +145,25 @@ public class CanvasApplication {
             if (event.getClickCount() > 1) return;
             if (event.getButton() != MouseButton.PRIMARY) return;
 
-            tirDuJoueur(event, gc);
+            tirDuJoueur(event);
             if (ordi.estVaincu()) {
                 List<String> nouveauxSucces = gestionnaireSucces.validerFinDePartie(true, numeroTour);
                 afficherAlertesSucces(nouveauxSucces);
 
-                afficherEcranFin("FÉLICITATIONS !\nVous avez détruit la flotte ennemie !", stage);
+                afficherEcranFin("FÉLICITATIONS !\nVous avez détruit la flotte ennemie !");
                 return;
             }
 
             PauseTransition pause = new PauseTransition(Duration.seconds(1));
-            pause.setOnFinished(_ -> tirDeLOrdi(stage, gc));
+            pause.setOnFinished(_ -> tirDeLOrdi());
             pause.play();
 
         });
 
-        rafraichirEcran(gc);
+        rafraichirEcran();
 
         Button btnCombattre = new Button("Combattre");
-        btnCombattre.setOnAction(e -> {
+        btnCombattre.setOnAction(_ -> {
             boolean tousPlaces = true;
             for (BateauGraphique b : flotte) {
                 if (!b.estPlace) {
@@ -166,7 +177,7 @@ public class CanvasApplication {
                 ordi.placerBateauxAleatoirement();
                 btnCombattre.setText("Bataille en cours...");
                 btnCombattre.setDisable(true);
-                rafraichirEcran(gc);
+                rafraichirEcran();
             } else {
                 btnCombattre.setText("Placez toute la flotte d'abord");
             }
@@ -182,22 +193,21 @@ public class CanvasApplication {
         BorderPane root = new BorderPane(conteneur);
         root.setPadding(new Insets(10));
 
-        Scene scene = new Scene(root, LARGEUR_CANVAS + 20, HAUTEUR_CANVAS + 160);
+        scene = new Scene(root, LARGEUR_CANVAS + 20, HAUTEUR_CANVAS + 160);
         URL cssUrl = getClass().getResource("/school/coda/lucas/colomban/style.css");
         if (cssUrl != null) {
             scene.getStylesheets().add(cssUrl.toExternalForm());
         }
 
         root.getStyleClass().add("menu-fond-sot");
-
-        stage.setTitle("Bataille Javale");
-        stage.setScene(scene);
-        stage.show();
-        stage.setFullScreenExitHint("");
-        stage.setFullScreen(true);
+        return scene;
     }
 
-    private void tirDuJoueur(MouseEvent event, GraphicsContext gc) {
+    public Scene getScene() {
+        return scene;
+    }
+
+    private void tirDuJoueur(MouseEvent event) {
         double mx = event.getX();
         double my = event.getY();
 
@@ -225,10 +235,10 @@ public class CanvasApplication {
 
         lecteur.playSoundForAction(messageTirJoueur, aTouche);
 
-        rafraichirEcran(gc);
+        rafraichirEcran();
     }
 
-    private void tirDeLOrdi(Stage stage, GraphicsContext gc) {
+    private void tirDeLOrdi() {
         ordi.jouerTour(maGrille);
         String messageTirOrdi = maGrille.getDernierMessage();
         journalDeBord.appendTir("ORDI", messageTirOrdi);
@@ -241,20 +251,20 @@ public class CanvasApplication {
             List<String> nouveauxSucces = gestionnaireSucces.validerFinDePartie(false, numeroTour);
             afficherAlertesSucces(nouveauxSucces);
 
-            afficherEcranFin("DÉFAITE...\nL'ordinateur a coulé tous vos navires.", stage);
+            afficherEcranFin("DÉFAITE...\nL'ordinateur a coulé tous vos navires.");
             return;
         }
 
         lecteur.playSoundForAction(messageTirOrdi, messageTirOrdi.contains("Touché"));
 
-        rafraichirEcran(gc);
+        rafraichirEcran();
         tourDuJoueur = true;
     }
 
-    private void rafraichirEcran(GraphicsContext gc) {
+    private void rafraichirEcran() {
         gc.clearRect(0, 0, LARGEUR_CANVAS, HAUTEUR_CANVAS);
 
-        dessinerDecor(gc);
+        dessinerDecor();
 
         gc.setFill(Color.DARKGRAY);
         gc.setStroke(Color.BLACK);
@@ -283,7 +293,7 @@ public class CanvasApplication {
         monSystemeDeTir.dessinerTousLesTirs(maGrille, ordi.getSaGrille());
     }
 
-    private void dessinerDecor(GraphicsContext gc) {
+    private void dessinerDecor() {
         gc.setFill(Color.rgb(10, 27, 42, 0.7));
         gc.fillRect(MARGE, MARGE, TAILLE_GRILLE * TAILLE_CASE, TAILLE_GRILLE * TAILLE_CASE);
         gc.fillRect(DECALAGE_RADAR, MARGE, TAILLE_GRILLE * TAILLE_CASE, TAILLE_GRILLE * TAILLE_CASE);
@@ -328,7 +338,7 @@ public class CanvasApplication {
         }
     }
 
-    private void afficherEcranFin(String message, Stage stage) {
+    private void afficherEcranFin(String message) {
         lecteur.stopMusic();
 
 
