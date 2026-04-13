@@ -124,34 +124,16 @@ public class CanvasApplication {
             double my = event.getY();
 
             for (int i = flotte.size() - 1; i >= 0; i--) {
-                BateauGraphique b = flotte.get(i);
-
-                if (b.contient(mx, my)) {
-                    if (event.getButton() == MouseButton.SECONDARY) {
-                        b.orientation = (b.orientation == Orientation.HORIZONTAL) ? Orientation.VERTICAL : Orientation.HORIZONTAL;
-
-                        if (b.estPlace) {
-                            maGrille.retirerBateau(b.bateauLogique);
-                            Bateau testPivot = new Bateau(b.type, b.orientation, b.bateauLogique.getCoordonneeX(), b.bateauLogique.getCoordonneeY());
-                            if (maGrille.placerBateau(testPivot)) {
-                                b.bateauLogique = testPivot;
-                            } else {
-                                b.estPlace = false;
-                                b.bateauLogique = null;
-                                b.x = b.startX;
-                                b.y = b.startY;
-                                b.orientation = Orientation.HORIZONTAL;
-                            }
+                BateauGraphique bateau = flotte.get(i);
+                if (bateau.contient(mx, my)) {
+                    switch (event.getButton()) {
+                        case SECONDARY -> bateau.reorienter(maGrille);
+                        case PRIMARY -> {
+                            bateau.retirerSiPlaceSur(this.maGrille);
+                            bateauEnCoursDeDrag = bateau;
+                            dragOffsetX = mx - bateau.x;
+                            dragOffsetY = my - bateau.y;
                         }
-                    } else if (event.getButton() == MouseButton.PRIMARY) {
-                        if (b.estPlace) {
-                            maGrille.retirerBateau(b.bateauLogique);
-                            b.estPlace = false;
-                            b.bateauLogique = null;
-                        }
-                        bateauEnCoursDeDrag = b;
-                        dragOffsetX = mx - b.x;
-                        dragOffsetY = my - b.y;
                     }
                     rafraichirEcran(gc);
                     break;
@@ -162,31 +144,17 @@ public class CanvasApplication {
         canvas.setOnMouseDragged(event -> {
             if (!enPhaseDePlacement) return;
             if (bateauEnCoursDeDrag != null) {
-                bateauEnCoursDeDrag.x = event.getX() - dragOffsetX;
-                bateauEnCoursDeDrag.y = event.getY() - dragOffsetY;
+                double x = event.getX() - dragOffsetX;
+                double y = event.getY() - dragOffsetY;
+                bateauEnCoursDeDrag.moveToPosition(x, y);
                 rafraichirEcran(gc);
             }
         });
 
-        canvas.setOnMouseReleased(event -> {
+        canvas.setOnMouseReleased(_ -> {
             if (!enPhaseDePlacement) return;
             if (bateauEnCoursDeDrag != null) {
-                int caseX = (int) ((bateauEnCoursDeDrag.x + (TAILLE_CASE / 2.0) - MARGE) / TAILLE_CASE);
-                int caseY = (int) ((bateauEnCoursDeDrag.y + (TAILLE_CASE / 2.0) - MARGE) / TAILLE_CASE);
-
-                Bateau bateauTest = new Bateau(bateauEnCoursDeDrag.type, bateauEnCoursDeDrag.orientation, caseX, caseY);
-
-                if (maGrille.placerBateau(bateauTest)) {
-                    bateauEnCoursDeDrag.estPlace = true;
-                    bateauEnCoursDeDrag.bateauLogique = bateauTest;
-
-                    bateauEnCoursDeDrag.x = MARGE + (caseX * TAILLE_CASE);
-                    bateauEnCoursDeDrag.y = MARGE + (caseY * TAILLE_CASE);
-                } else {
-                    bateauEnCoursDeDrag.x = bateauEnCoursDeDrag.startX;
-                    bateauEnCoursDeDrag.y = bateauEnCoursDeDrag.startY;
-                    bateauEnCoursDeDrag.orientation = Orientation.HORIZONTAL;
-                }
+                bateauEnCoursDeDrag.placerSur(maGrille);
                 bateauEnCoursDeDrag = null;
                 rafraichirEcran(gc);
             }
@@ -201,38 +169,72 @@ public class CanvasApplication {
                 double mx = event.getX();
                 double my = event.getY();
 
-                if (mx >= DECALAGE_RADAR && mx < DECALAGE_RADAR + (TAILLE_GRILLE * TAILLE_CASE) &&
-                    my >= MARGE && my < MARGE + (TAILLE_GRILLE * TAILLE_CASE)) {
+                boolean horsGrille = !(mx >= DECALAGE_RADAR) || !(mx < DECALAGE_RADAR + (TAILLE_GRILLE * TAILLE_CASE)) ||
+                                     !(my >= MARGE) || !(my < MARGE + (TAILLE_GRILLE * TAILLE_CASE));
 
-                    int caseX = (int) ((mx - DECALAGE_RADAR) / TAILLE_CASE);
-                    int caseY = (int) ((my - MARGE) / TAILLE_CASE);
+                if (horsGrille) {
+                    return;
+                }
 
-                    boolean[][] touches = ordi.getSaGrille().getTirsTouches();
-                    boolean[][] rates = ordi.getSaGrille().getTirsRates();
+                int caseX = (int) ((mx - DECALAGE_RADAR) / TAILLE_CASE);
+                int caseY = (int) ((my - MARGE) / TAILLE_CASE);
 
-                    if (touches[caseY][caseX] || rates[caseY][caseX]) {
-                        journalDeBord.appendText("ATTENTION : Case " + (char) ('A' + caseY) + "-" + (caseX + 1) + " déjà ciblée ! Tir annulé.");
-                        return;
-                    }
+                // TODO : fix demeter
+                boolean[][] touches = ordi.getSaGrille().getTirsTouches();
+                boolean[][] rates = ordi.getSaGrille().getTirsRates();
 
-                    tourDuJoueur = false;
-                    journalDeBord.appendTour(numeroTour);
+                boolean dejaCible = touches[caseY][caseX] || rates[caseY][caseX];
+                if (dejaCible) {
+                    journalDeBord.appendText("ATTENTION : Case " + (char) ('A' + caseY) + "-" + (caseX + 1) + " déjà ciblée ! Tir annulé.");
+                    return;
+                }
 
-                    boolean aTouche = ordi.getSaGrille().recevoirTir(caseX, caseY);
-                    String messageTirJoueur = ordi.getSaGrille().getDernierMessage();
-                    journalDeBord.appendTir("VOUS", messageTirJoueur);
+                tourDuJoueur = false;
+                journalDeBord.appendTour(numeroTour);
 
-                    if (ordi.getSaGrille().estFlotteCoulee()) {
+                boolean aTouche = ordi.getSaGrille().recevoirTir(caseX, caseY);
+                String messageTirJoueur = ordi.getSaGrille().getDernierMessage();
+                journalDeBord.appendTir("VOUS", messageTirJoueur);
 
-                        List<String> nouveauxSucces = gestionnaireSucces.validerFinDePartie(true, numeroTour);
+                if (ordi.getSaGrille().estFlotteCoulee()) {
+
+                    List<String> nouveauxSucces = gestionnaireSucces.validerFinDePartie(true, numeroTour);
+                    afficherAlertesSucces(nouveauxSucces);
+
+                    afficherEcranFin("FÉLICITATIONS !\nVous avez détruit la flotte ennemie !", stage);
+                    return;
+                }
+
+                if (messageTirJoueur.contains("Touché-Coulé")) {
+                    if (sonCoule != null) sonCoule.play();
+                } else if (aTouche) {
+                    if (sonTouche != null) sonTouche.play();
+                } else {
+                    if (sonRate != null) sonRate.play();
+                }
+
+                rafraichirEcran(gc);
+
+                PauseTransition pause = new PauseTransition(Duration.seconds(1));
+                pause.setOnFinished(e -> {
+                    ordi.jouerTour(maGrille);
+                    String messageTirOrdi = maGrille.getDernierMessage();
+                    journalDeBord.appendTir("ORDI", messageTirOrdi);
+                    journalDeBord.appendBlankLine();
+
+                    numeroTour++;
+
+                    if (maGrille.estFlotteCoulee()) {
+
+                        List<String> nouveauxSucces = gestionnaireSucces.validerFinDePartie(false, numeroTour);
                         afficherAlertesSucces(nouveauxSucces);
 
-                        afficherEcranFin("FÉLICITATIONS !\nVous avez détruit la flotte ennemie !", stage);
+                        afficherEcranFin("DÉFAITE...\nL'ordinateur a coulé tous vos navires.", stage);
                         return;
                     } else {
-                        if (messageTirJoueur.contains("Touché-Coulé")) {
+                        if (messageTirOrdi.contains("Touché-Coulé")) {
                             if (sonCoule != null) sonCoule.play();
-                        } else if (aTouche) {
+                        } else if (messageTirOrdi.contains("Touché")) {
                             if (sonTouche != null) sonTouche.play();
                         } else {
                             if (sonRate != null) sonRate.play();
@@ -240,38 +242,10 @@ public class CanvasApplication {
                     }
 
                     rafraichirEcran(gc);
+                    tourDuJoueur = true;
+                });
+                pause.play();
 
-                    PauseTransition pause = new PauseTransition(Duration.seconds(1));
-                    pause.setOnFinished(e -> {
-                        ordi.jouerTour(maGrille);
-                        String messageTirOrdi = maGrille.getDernierMessage();
-                        journalDeBord.appendTir("ORDI", messageTirOrdi);
-                        journalDeBord.appendBlankLine();
-
-                        numeroTour++;
-
-                        if (maGrille.estFlotteCoulee()) {
-
-                            List<String> nouveauxSucces = gestionnaireSucces.validerFinDePartie(false, numeroTour);
-                            afficherAlertesSucces(nouveauxSucces);
-
-                            afficherEcranFin("DÉFAITE...\nL'ordinateur a coulé tous vos navires.", stage);
-                            return;
-                        } else {
-                            if (messageTirOrdi.contains("Touché-Coulé")) {
-                                if (sonCoule != null) sonCoule.play();
-                            } else if (messageTirOrdi.contains("Touché")) {
-                                if (sonTouche != null) sonTouche.play();
-                            } else {
-                                if (sonRate != null) sonRate.play();
-                            }
-                        }
-
-                        rafraichirEcran(gc);
-                        tourDuJoueur = true;
-                    });
-                    pause.play();
-                }
             }
         });
 
@@ -481,16 +455,72 @@ public class CanvasApplication {
 
         public BateauGraphique(TypeBateau type, double startX, double startY) {
             this.type = type;
-            this.x = startX;
-            this.y = startY;
             this.startX = startX;
             this.startY = startY;
+            resetToInitialPosition();
         }
 
         public boolean contient(double mouseX, double mouseY) {
             double largeur = (orientation == Orientation.HORIZONTAL) ? type.getTaille() * TAILLE_CASE : TAILLE_CASE;
             double hauteur = (orientation == Orientation.VERTICAL) ? type.getTaille() * TAILLE_CASE : TAILLE_CASE;
             return mouseX >= x && mouseX <= x + largeur && mouseY >= y && mouseY <= y + hauteur;
+        }
+
+        /**
+         * Change l'orientation d'un bateau placé sur la grille (VERTICAL -> HORIZONTAL ou HORIZONTAL -> VERTICAL)
+         *
+         * <p>Le bateau est retiré de la grille en cas de placement invalide après réorientation
+         */
+        public void reorienter(Grille grille) {
+            orientation = (orientation == Orientation.HORIZONTAL) ? Orientation.VERTICAL : Orientation.HORIZONTAL;
+
+            if (estPlace) {
+                grille.retirerBateau(bateauLogique);
+                Bateau testPivot = new Bateau(type, orientation, bateauLogique.getCoordonneeX(), bateauLogique.getCoordonneeY());
+                if (grille.placerBateau(testPivot)) {
+                    bateauLogique = testPivot;
+                } else {
+                    estPlace = false;
+                    bateauLogique = null;
+                    resetToInitialPosition();
+                }
+            }
+        }
+
+        public void retirerSiPlaceSur(Grille grille) {
+            if (estPlace) {
+                grille.retirerBateau(bateauLogique);
+                estPlace = false;
+                bateauLogique = null;
+            }
+        }
+
+        public void placerSur(Grille grille) {
+            int caseX = (int) ((x + (TAILLE_CASE / 2.0) - MARGE) / TAILLE_CASE);
+            int caseY = (int) ((y + (TAILLE_CASE / 2.0) - MARGE) / TAILLE_CASE);
+
+            Bateau bateauTest = new Bateau(type, orientation, caseX, caseY);
+
+            if (grille.placerBateau(bateauTest)) {
+                estPlace = true;
+                bateauLogique = bateauTest;
+
+                this.x = MARGE + (caseX * TAILLE_CASE);
+                this.y = MARGE + (caseY * TAILLE_CASE);
+            } else {
+                resetToInitialPosition();
+            }
+        }
+
+        private void resetToInitialPosition() {
+            this.x = startX;
+            this.y = startY;
+            this.orientation = Orientation.HORIZONTAL;
+        }
+
+        public void moveToPosition(double x, double y) {
+            this.x = x;
+            this.y = y;
         }
     }
 }
