@@ -13,7 +13,7 @@ public class SystemeDeTir {
     /** Position horizontale de la 2ème grille à droite */
     private static final int DECALAGE_RADAR = 400;
 
-    private GraphicsContext gc;
+    private final GraphicsContext gc;
 
     public SystemeDeTir(GraphicsContext gc) {
         this.gc = gc;

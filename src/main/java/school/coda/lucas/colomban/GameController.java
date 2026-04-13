@@ -34,18 +34,7 @@ import java.util.List;
 
 public class GameController {
 
-    private final Stage stage;
-    private final Canvas canvas;
-    private final GraphicsContext gc;
-    private final GestionnaireSucces gestionnaireSucces = new GestionnaireSucces("Joueur");
-    private final Scene scene;
-    private final JournalDeBord journalDeBord;
-
-    private boolean enPhaseDePlacement = true;
-    private boolean tourDuJoueur = true;
-
     private static final int TAILLE_GRILLE = 10;
-
     public static final int TAILLE_CASE = 30;
     /**
      * Marge de la taille d'une case pour y mettre nos lettres et chiffres
@@ -57,34 +46,39 @@ public class GameController {
     private static final int DECALAGE_RADAR = 400;
     private static final int LARGEUR_CANVAS = 800;
     private static final int HAUTEUR_CANVAS = 600;
-    private Grille maGrille;
 
-    private JoueurOrdi ordi;
-    private SystemeDeTir monSystemeDeTir;
+    private final Stage stage;
+    private final Canvas canvas;
+    private final GraphicsContext gc;
+    private final GestionnaireSucces gestionnaireSucces;
+    private final Scene scene;
+    private final JournalDeBord journalDeBord;
+    private final Grille maGrille;
+    private final LecteurMusiqueJeu lecteur;
+    private final JoueurOrdi ordi;
+    private final SystemeDeTir monSystemeDeTir;
+    private final List<BateauGraphique> flotte;
+
     private int numeroTour = 1;
-
-    private List<BateauGraphique> flotte;
-
     private BateauGraphique bateauEnCoursDeDrag = null;
-
     private double dragOffsetX = 0;
     private double dragOffsetY = 0;
-    private LecteurMusiqueJeu lecteur;
+    private boolean enPhaseDePlacement = true;
+    private boolean tourDuJoueur = true;
 
     public GameController(Stage stage) {
         this.stage = stage;
         canvas = new Canvas(LARGEUR_CANVAS, HAUTEUR_CANVAS);
         gc = canvas.getGraphicsContext2D();
+
         journalDeBord = new JournalDeBord(LARGEUR_CANVAS);
         journalDeBord.appendText("Placez vos 5 bateaux sur la grille de gauche.");
-        this.scene = createScene();
-    }
 
-    private Scene createScene() {
         lecteur = new LecteurMusiqueJeu();
         lecteur.startMusic();
 
         maGrille = new Grille();
+
         ordi = new JoueurOrdi();
 
         flotte = new ArrayList<>();
@@ -94,8 +88,13 @@ public class GameController {
         flotte.add(new BateauGraphique(TypeBateau.SOUS_MARIN, 200, 470));
         flotte.add(new BateauGraphique(TypeBateau.PATROUILLEUR, 200, 520));
 
-
         monSystemeDeTir = new SystemeDeTir(gc);
+
+        this.scene = createScene();
+        gestionnaireSucces = new GestionnaireSucces("Joueur");
+    }
+
+    private Scene createScene() {
 
         canvas.setOnMousePressed(this::onCanvasMousePressed);
 
@@ -107,6 +106,29 @@ public class GameController {
 
         rafraichirEcran();
 
+        Button btnCombattre = createBoutonCombattre();
+
+        Group group = new Group();
+        group.getChildren().add(canvas);
+
+        VBox conteneur = new VBox(15);
+        conteneur.setAlignment(Pos.CENTER);
+        conteneur.getChildren().addAll(group, btnCombattre, journalDeBord.getTextArea());
+
+        BorderPane root = new BorderPane(conteneur);
+        root.setPadding(new Insets(10));
+
+        Scene scene = new Scene(root, LARGEUR_CANVAS + 20, HAUTEUR_CANVAS + 160);
+        URL cssUrl = getClass().getResource("/school/coda/lucas/colomban/style.css");
+        if (cssUrl != null) {
+            scene.getStylesheets().add(cssUrl.toExternalForm());
+        }
+
+        root.getStyleClass().add("menu-fond-sot");
+        return scene;
+    }
+
+    private Button createBoutonCombattre() {
         Button btnCombattre = new Button("Combattre");
         btnCombattre.setOnAction(_ -> {
             boolean tousPlaces = true;
@@ -127,25 +149,7 @@ public class GameController {
                 btnCombattre.setText("Placez toute la flotte d'abord");
             }
         });
-
-        Group group = new Group();
-        group.getChildren().add(canvas);
-
-        VBox conteneur = new VBox(15);
-        conteneur.setAlignment(Pos.CENTER);
-        conteneur.getChildren().addAll(group, btnCombattre, journalDeBord.getTextArea());
-
-        BorderPane root = new BorderPane(conteneur);
-        root.setPadding(new Insets(10));
-
-        Scene scene = new Scene(root, LARGEUR_CANVAS + 20, HAUTEUR_CANVAS + 160);
-        URL cssUrl = getClass().getResource("/school/coda/lucas/colomban/style.css");
-        if (cssUrl != null) {
-            scene.getStylesheets().add(cssUrl.toExternalForm());
-        }
-
-        root.getStyleClass().add("menu-fond-sot");
-        return scene;
+        return btnCombattre;
     }
 
     public Scene getScene() {
