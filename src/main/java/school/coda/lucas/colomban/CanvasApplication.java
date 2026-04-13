@@ -73,7 +73,9 @@ public class CanvasApplication {
     public void start(Stage stage) {
         journalDeBord = new JournalDeBord();
         journalDeBord.appendText("Placez vos 5 bateaux sur la grille de gauche.");
-        this.lecteur = new LecteurMusiqueJeu();
+        lecteur = new LecteurMusiqueJeu();
+        lecteur.startMusic();
+
         maGrille = new Grille();
         ordi = new JoueurOrdi();
 
@@ -332,9 +334,8 @@ public class CanvasApplication {
     }
 
     private void afficherEcranFin(String message, Stage stage) {
-        if (lecteurMusiqueJeu != null) {
-            lecteurMusiqueJeu.stop();
-        }
+        lecteur.stopMusic();
+
 
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("game-over-view.fxml"));
@@ -493,7 +494,6 @@ public class CanvasApplication {
                 lecteurMusiqueJeu = new MediaPlayer(media);
                 lecteurMusiqueJeu.setCycleCount(MediaPlayer.INDEFINITE);
                 lecteurMusiqueJeu.setVolume(0.4);
-                lecteurMusiqueJeu.play();
             });
 
             loadSound("spas-12.mp3").ifPresent(audioClip -> {
@@ -510,6 +510,18 @@ public class CanvasApplication {
                 sonRate = audioClip;
                 sonRate.setVolume(1.0);
             });
+        }
+
+        public void startMusic() {
+            if (lecteurMusiqueJeu != null) {
+                lecteurMusiqueJeu.play();
+            }
+        }
+
+        public void stopMusic() {
+            if (lecteurMusiqueJeu != null) {
+                lecteurMusiqueJeu.stop();
+            }
         }
 
         public void playSoundForAction(String messageTirJoueur, boolean aTouche) {
