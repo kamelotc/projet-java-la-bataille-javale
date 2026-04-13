@@ -8,7 +8,7 @@ import javafx.scene.Scene;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.stage.Stage;
-import school.coda.lucas.colomban.CanvasApplication;
+import school.coda.lucas.colomban.GameController;
 import school.coda.lucas.colomban.Main;
 
 import java.io.IOException;
@@ -41,7 +41,7 @@ public class MenuController {
             lecteurMusique = null;
         }
         Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-        CanvasApplication monJeu = new CanvasApplication(stage);
+        GameController monJeu = new GameController(stage);
         Scene scene = monJeu.getScene();
         stage.setTitle("Bataille Javale");
         stage.setScene(scene);

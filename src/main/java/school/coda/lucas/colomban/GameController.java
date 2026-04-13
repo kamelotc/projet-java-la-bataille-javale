@@ -32,7 +32,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CanvasApplication {
+public class GameController {
 
     private final Stage stage;
     private final Canvas canvas;
@@ -70,7 +70,7 @@ public class CanvasApplication {
     private double dragOffsetX = 0;
     private double dragOffsetY = 0;
     private LecteurMusiqueJeu lecteur;
-    public CanvasApplication(Stage stage) {
+    public GameController(Stage stage) {
         this.stage = stage;
         canvas = new Canvas(LARGEUR_CANVAS, HAUTEUR_CANVAS);
         gc = canvas.getGraphicsContext2D();

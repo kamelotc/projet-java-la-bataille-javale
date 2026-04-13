@@ -21,8 +21,8 @@ class BateauGraphique {
     }
 
     public boolean contient(double mouseX, double mouseY) {
-        double largeur = (orientation == Orientation.HORIZONTAL) ? type.getTaille() * CanvasApplication.TAILLE_CASE : CanvasApplication.TAILLE_CASE;
-        double hauteur = (orientation == Orientation.VERTICAL) ? type.getTaille() * CanvasApplication.TAILLE_CASE : CanvasApplication.TAILLE_CASE;
+        double largeur = (orientation == Orientation.HORIZONTAL) ? type.getTaille() * GameController.TAILLE_CASE : GameController.TAILLE_CASE;
+        double hauteur = (orientation == Orientation.VERTICAL) ? type.getTaille() * GameController.TAILLE_CASE : GameController.TAILLE_CASE;
         return mouseX >= x && mouseX <= x + largeur && mouseY >= y && mouseY <= y + hauteur;
     }
 
@@ -56,8 +56,8 @@ class BateauGraphique {
     }
 
     public void placerSur(Grille grille) {
-        int caseX = (int) ((x + (CanvasApplication.TAILLE_CASE / 2.0) - CanvasApplication.MARGE) / CanvasApplication.TAILLE_CASE);
-        int caseY = (int) ((y + (CanvasApplication.TAILLE_CASE / 2.0) - CanvasApplication.MARGE) / CanvasApplication.TAILLE_CASE);
+        int caseX = (int) ((x + (GameController.TAILLE_CASE / 2.0) - GameController.MARGE) / GameController.TAILLE_CASE);
+        int caseY = (int) ((y + (GameController.TAILLE_CASE / 2.0) - GameController.MARGE) / GameController.TAILLE_CASE);
 
         Bateau bateauTest = new Bateau(type, orientation, caseX, caseY);
 
@@ -65,8 +65,8 @@ class BateauGraphique {
             estPlace = true;
             bateauLogique = bateauTest;
 
-            this.x = CanvasApplication.MARGE + (caseX * CanvasApplication.TAILLE_CASE);
-            this.y = CanvasApplication.MARGE + (caseY * CanvasApplication.TAILLE_CASE);
+            this.x = GameController.MARGE + (caseX * GameController.TAILLE_CASE);
+            this.y = GameController.MARGE + (caseY * GameController.TAILLE_CASE);
         } else {
             resetToInitialPosition();
         }
