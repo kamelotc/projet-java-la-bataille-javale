@@ -179,12 +179,7 @@ public class CanvasApplication {
                 int caseX = (int) ((mx - DECALAGE_RADAR) / TAILLE_CASE);
                 int caseY = (int) ((my - MARGE) / TAILLE_CASE);
 
-                // TODO : fix demeter
-                boolean[][] touches = ordi.getSaGrille().getTirsTouches();
-                boolean[][] rates = ordi.getSaGrille().getTirsRates();
-
-                boolean dejaCible = touches[caseY][caseX] || rates[caseY][caseX];
-                if (dejaCible) {
+                if (ordi.isDejaCible(caseY, caseX)) {
                     journalDeBord.appendText("ATTENTION : Case " + (char) ('A' + caseY) + "-" + (caseX + 1) + " déjà ciblée ! Tir annulé.");
                     return;
                 }

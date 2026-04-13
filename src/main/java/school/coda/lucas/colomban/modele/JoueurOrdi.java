@@ -54,4 +54,11 @@ public class JoueurOrdi {
     public Grille getSaGrille() {
         return saGrille;
     }
+
+    public boolean isDejaCible(int caseY, int caseX) {
+        boolean[][] touches = saGrille.getTirsTouches();
+        boolean[][] rates = saGrille.getTirsRates();
+
+        return touches[caseY][caseX] || rates[caseY][caseX];
+    }
 }
