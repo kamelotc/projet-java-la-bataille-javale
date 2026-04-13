@@ -8,7 +8,9 @@ public class SystemeDeTir {
 
     private static final int TAILLE_GRILLE = 10;
     private static final int TAILLE_CASE = 30;
+    /** Marge de la taille d'une case pour y mettre nos lettres et chiffres */
     private static final int MARGE = 50;
+    /** Position horizontale de la 2ème grille à droite */
     private static final int DECALAGE_RADAR = 400;
 
     private GraphicsContext gc;
