@@ -78,7 +78,6 @@ public class CanvasApplication {
     public void start(Stage stage) {
         journalDeBord = new JournalDeBord();
         journalDeBord.appendText("Placez vos 5 bateaux sur la grille de gauche.");
-        lecteur.initSoundBox(this);
         this.lecteur = new LecteurMusiqueJeu();
         maGrille = new Grille();
         ordi = new JoueurOrdi();
@@ -493,6 +492,41 @@ public class CanvasApplication {
         private AudioClip sonCoule;
         private AudioClip sonRate;
 
+        public LecteurMusiqueJeu() {
+            initSoundBox();
+        }
+
+        private void initSoundBox() {
+            URL cheminMusique = LecteurMusiqueJeu.class.getResource("/school/coda/lucas/colomban/audio/musique_combat.mp3");
+            if (cheminMusique != null) {
+                Media media = new Media(cheminMusique.toExternalForm());
+                lecteurMusiqueJeu = new MediaPlayer(media);
+                lecteurMusiqueJeu.setCycleCount(MediaPlayer.INDEFINITE);
+                lecteurMusiqueJeu.setVolume(0.4);
+                lecteurMusiqueJeu.play();
+            } else {
+                System.out.println("Musique du jeu introuvable !");
+            }
+
+            URL cheminSonTouche = LecteurMusiqueJeu.class.getResource("/school/coda/lucas/colomban/audio/spas-12.mp3");
+            if (cheminSonTouche != null) {
+                sonTouche = new AudioClip(cheminSonTouche.toExternalForm());
+                sonTouche.setVolume(0.8);
+            }
+
+            URL cheminSonCoule = LecteurMusiqueJeu.class.getResource("/school/coda/lucas/colomban/audio/bruit-coule.mp3");
+            if (cheminSonCoule != null) {
+                sonCoule = new AudioClip(cheminSonCoule.toExternalForm());
+                sonCoule.setVolume(1.0);
+            }
+
+            URL cheminSonRate = LecteurMusiqueJeu.class.getResource("/school/coda/lucas/colomban/audio/bruh.mp3");
+            if (cheminSonRate != null) {
+                sonRate = new AudioClip(cheminSonRate.toExternalForm());
+                sonRate.setVolume(1.0);
+            }
+        }
+
         private void playSoundForAction(String messageTirJoueur, boolean aTouche, CanvasApplication canvasApplication) {
             if (messageTirJoueur.contains("Touché-Coulé")) {
                 if (canvasApplication.sonCoule != null) canvasApplication.sonCoule.play();
@@ -500,37 +534,6 @@ public class CanvasApplication {
                 if (canvasApplication.sonTouche != null) canvasApplication.sonTouche.play();
             } else {
                 if (canvasApplication.sonRate != null) canvasApplication.sonRate.play();
-            }
-        }
-
-        private void initSoundBox(CanvasApplication canvasApplication) {
-            URL cheminMusique = canvasApplication.getClass().getResource("/school/coda/lucas/colomban/audio/musique_combat.mp3");
-            if (cheminMusique != null) {
-                Media media = new Media(cheminMusique.toExternalForm());
-                canvasApplication.lecteurMusiqueJeu = new MediaPlayer(media);
-                canvasApplication.lecteurMusiqueJeu.setCycleCount(MediaPlayer.INDEFINITE);
-                canvasApplication.lecteurMusiqueJeu.setVolume(0.4);
-                canvasApplication.lecteurMusiqueJeu.play();
-            } else {
-                System.out.println("Musique du jeu introuvable !");
-            }
-
-            URL cheminSonTouche = canvasApplication.getClass().getResource("/school/coda/lucas/colomban/audio/spas-12.mp3");
-            if (cheminSonTouche != null) {
-                canvasApplication.sonTouche = new AudioClip(cheminSonTouche.toExternalForm());
-                canvasApplication.sonTouche.setVolume(0.8);
-            }
-
-            URL cheminSonCoule = canvasApplication.getClass().getResource("/school/coda/lucas/colomban/audio/bruit-coule.mp3");
-            if (cheminSonCoule != null) {
-                canvasApplication.sonCoule = new AudioClip(cheminSonCoule.toExternalForm());
-                canvasApplication.sonCoule.setVolume(1.0);
-            }
-
-            URL cheminSonRate = canvasApplication.getClass().getResource("/school/coda/lucas/colomban/audio/bruh.mp3");
-            if (cheminSonRate != null) {
-                canvasApplication.sonRate = new AudioClip(cheminSonRate.toExternalForm());
-                canvasApplication.sonRate.setVolume(1.0);
             }
         }
     }
