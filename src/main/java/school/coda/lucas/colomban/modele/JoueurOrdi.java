@@ -3,8 +3,8 @@ package school.coda.lucas.colomban.modele;
 import java.util.Random;
 
 public class JoueurOrdi {
-    private Grille saGrille;
-    private Random  random;
+    private final Grille saGrille;
+    private final Random  random;
 
     public JoueurOrdi() {
         this.saGrille = new Grille();

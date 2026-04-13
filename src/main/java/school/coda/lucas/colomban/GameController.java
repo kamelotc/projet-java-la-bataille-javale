@@ -37,12 +37,13 @@ public class GameController {
     private final Stage stage;
     private final Canvas canvas;
     private final GraphicsContext gc;
-
-    private Scene scene;
+    private final GestionnaireSucces gestionnaireSucces = new GestionnaireSucces("Joueur");
+    private final Scene scene;
+    private final JournalDeBord journalDeBord;
 
     private boolean enPhaseDePlacement = true;
     private boolean tourDuJoueur = true;
-    private JournalDeBord journalDeBord;
+
     private static final int TAILLE_GRILLE = 10;
 
     public static final int TAILLE_CASE = 30;
@@ -62,7 +63,6 @@ public class GameController {
     private SystemeDeTir monSystemeDeTir;
     private int numeroTour = 1;
 
-    private GestionnaireSucces gestionnaireSucces = new GestionnaireSucces("Joueur");
     private List<BateauGraphique> flotte;
 
     private BateauGraphique bateauEnCoursDeDrag = null;
@@ -70,16 +70,17 @@ public class GameController {
     private double dragOffsetX = 0;
     private double dragOffsetY = 0;
     private LecteurMusiqueJeu lecteur;
+
     public GameController(Stage stage) {
         this.stage = stage;
         canvas = new Canvas(LARGEUR_CANVAS, HAUTEUR_CANVAS);
         gc = canvas.getGraphicsContext2D();
+        journalDeBord = new JournalDeBord(LARGEUR_CANVAS);
+        journalDeBord.appendText("Placez vos 5 bateaux sur la grille de gauche.");
         this.scene = createScene();
     }
 
     private Scene createScene() {
-        journalDeBord = new JournalDeBord(LARGEUR_CANVAS);
-        journalDeBord.appendText("Placez vos 5 bateaux sur la grille de gauche.");
         lecteur = new LecteurMusiqueJeu();
         lecteur.startMusic();
 
@@ -96,69 +97,13 @@ public class GameController {
 
         monSystemeDeTir = new SystemeDeTir(gc);
 
-        canvas.setOnMousePressed(event -> {
-            if (!enPhaseDePlacement) return;
+        canvas.setOnMousePressed(this::onCanvasMousePressed);
 
-            double mx = event.getX();
-            double my = event.getY();
+        canvas.setOnMouseDragged(this::onCanvasMouseDragged);
 
-            for (int i = flotte.size() - 1; i >= 0; i--) {
-                BateauGraphique bateau = flotte.get(i);
-                if (bateau.contient(mx, my)) {
-                    switch (event.getButton()) {
-                        case SECONDARY -> bateau.reorienter(maGrille);
-                        case PRIMARY -> {
-                            bateau.retirerSiPlaceSur(this.maGrille);
-                            bateauEnCoursDeDrag = bateau;
-                            dragOffsetX = mx - bateau.x;
-                            dragOffsetY = my - bateau.y;
-                        }
-                    }
-                    rafraichirEcran();
-                    break;
-                }
-            }
-        });
+        canvas.setOnMouseReleased(this::onCanvasMouseReleased);
 
-        canvas.setOnMouseDragged(event -> {
-            if (!enPhaseDePlacement) return;
-            if (bateauEnCoursDeDrag != null) {
-                double x = event.getX() - dragOffsetX;
-                double y = event.getY() - dragOffsetY;
-                bateauEnCoursDeDrag.moveToPosition(x, y);
-                rafraichirEcran();
-            }
-        });
-
-        canvas.setOnMouseReleased(_ -> {
-            if (!enPhaseDePlacement) return;
-            if (bateauEnCoursDeDrag != null) {
-                bateauEnCoursDeDrag.placerSur(maGrille);
-                bateauEnCoursDeDrag = null;
-                rafraichirEcran();
-            }
-        });
-
-        canvas.setOnMouseClicked(event -> {
-            if (enPhaseDePlacement) return;
-            if (!tourDuJoueur) return;
-            if (event.getClickCount() > 1) return;
-            if (event.getButton() != MouseButton.PRIMARY) return;
-
-            tirDuJoueur(event);
-            if (ordi.estVaincu()) {
-                List<String> nouveauxSucces = gestionnaireSucces.validerFinDePartie(true, numeroTour);
-                afficherAlertesSucces(nouveauxSucces);
-
-                afficherEcranFin("FÉLICITATIONS !\nVous avez détruit la flotte ennemie !");
-                return;
-            }
-
-            PauseTransition pause = new PauseTransition(Duration.seconds(1));
-            pause.setOnFinished(_ -> tirDeLOrdi());
-            pause.play();
-
-        });
+        canvas.setOnMouseClicked(this::onCanvasMouseClicked);
 
         rafraichirEcran();
 
@@ -193,7 +138,7 @@ public class GameController {
         BorderPane root = new BorderPane(conteneur);
         root.setPadding(new Insets(10));
 
-        scene = new Scene(root, LARGEUR_CANVAS + 20, HAUTEUR_CANVAS + 160);
+        Scene scene = new Scene(root, LARGEUR_CANVAS + 20, HAUTEUR_CANVAS + 160);
         URL cssUrl = getClass().getResource("/school/coda/lucas/colomban/style.css");
         if (cssUrl != null) {
             scene.getStylesheets().add(cssUrl.toExternalForm());
@@ -205,6 +150,70 @@ public class GameController {
 
     public Scene getScene() {
         return scene;
+    }
+
+    private void onCanvasMouseClicked(MouseEvent event) {
+        if (enPhaseDePlacement) return;
+        if (!tourDuJoueur) return;
+        if (event.getClickCount() > 1) return;
+        if (event.getButton() != MouseButton.PRIMARY) return;
+
+        tirDuJoueur(event);
+        if (ordi.estVaincu()) {
+            List<String> nouveauxSucces = gestionnaireSucces.validerFinDePartie(true, numeroTour);
+            afficherAlertesSucces(nouveauxSucces);
+
+            afficherEcranFin("FÉLICITATIONS !\nVous avez détruit la flotte ennemie !");
+            return;
+        }
+
+        PauseTransition pause = new PauseTransition(Duration.seconds(1));
+        pause.setOnFinished(_ -> tirDeLOrdi());
+        pause.play();
+
+    }
+
+    private void onCanvasMouseReleased(MouseEvent e) {
+        if (!enPhaseDePlacement) return;
+        if (bateauEnCoursDeDrag != null) {
+            bateauEnCoursDeDrag.placerSur(maGrille);
+            bateauEnCoursDeDrag = null;
+            rafraichirEcran();
+        }
+    }
+
+    private void onCanvasMouseDragged(MouseEvent event) {
+        if (!enPhaseDePlacement) return;
+        if (bateauEnCoursDeDrag != null) {
+            double x = event.getX() - dragOffsetX;
+            double y = event.getY() - dragOffsetY;
+            bateauEnCoursDeDrag.moveToPosition(x, y);
+            rafraichirEcran();
+        }
+    }
+
+    private void onCanvasMousePressed(MouseEvent event) {
+        if (!enPhaseDePlacement) return;
+
+        double mx = event.getX();
+        double my = event.getY();
+
+        for (int i = flotte.size() - 1; i >= 0; i--) {
+            BateauGraphique bateau = flotte.get(i);
+            if (bateau.contient(mx, my)) {
+                switch (event.getButton()) {
+                    case SECONDARY -> bateau.reorienter(maGrille);
+                    case PRIMARY -> {
+                        bateau.retirerSiPlaceSur(this.maGrille);
+                        bateauEnCoursDeDrag = bateau;
+                        dragOffsetX = mx - bateau.x;
+                        dragOffsetY = my - bateau.y;
+                    }
+                }
+                rafraichirEcran();
+                break;
+            }
+        }
     }
 
     private void tirDuJoueur(MouseEvent event) {
