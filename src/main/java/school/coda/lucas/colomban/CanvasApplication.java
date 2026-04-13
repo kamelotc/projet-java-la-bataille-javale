@@ -517,7 +517,7 @@ public class CanvasApplication {
             this.y = y;
         }
     }
-    private class LecteurMusiqueJeu{
+    private static class LecteurMusiqueJeu{
 
         private void playSoundForAction(String messageTirJoueur, boolean aTouche, CanvasApplication canvasApplication) {
             if (messageTirJoueur.contains("Touché-Coulé")) {
