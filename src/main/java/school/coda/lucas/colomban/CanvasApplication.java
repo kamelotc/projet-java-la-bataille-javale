@@ -52,29 +52,6 @@ public class CanvasApplication extends Application {
     private school.coda.lucas.colomban.succes.GestionnaireSucces gestionnaireSucces =
             new school.coda.lucas.colomban.succes.GestionnaireSucces("Joueur");
 
-    private static class BateauGraphique {
-        TypeBateau type;
-        Orientation orientation = Orientation.HORIZONTAL;
-        double x, y, startX, startY;
-        boolean estPlace = false;
-
-        Bateau bateauLogique = null;
-
-        public BateauGraphique(TypeBateau type, double startX, double startY) {
-            this.type = type;
-            this.x = startX;
-            this.y = startY;
-            this.startX = startX;
-            this.startY = startY;
-        }
-
-        public boolean contient(double mouseX, double mouseY) {
-            double largeur = (orientation == Orientation.HORIZONTAL) ? type.getTaille() * TAILLE_CASE : TAILLE_CASE;
-            double hauteur = (orientation == Orientation.VERTICAL) ? type.getTaille() * TAILLE_CASE : TAILLE_CASE;
-            return mouseX >= x && mouseX <= x + largeur && mouseY >= y && mouseY <= y + hauteur;
-        }
-    }
-
     private List<BateauGraphique> flotte;
     private BateauGraphique bateauEnCoursDeDrag = null;
     private double dragOffsetX = 0;
@@ -444,4 +421,27 @@ public class CanvasApplication extends Application {
         }
     }
 
+}
+    private static class BateauGraphique {
+        TypeBateau type;
+        Orientation orientation = Orientation.HORIZONTAL;
+        double x, y, startX, startY;
+        boolean estPlace = false;
+
+        Bateau bateauLogique = null;
+
+        public BateauGraphique(TypeBateau type, double startX, double startY) {
+            this.type = type;
+            this.x = startX;
+            this.y = startY;
+            this.startX = startX;
+            this.startY = startY;
+        }
+
+        public boolean contient(double mouseX, double mouseY) {
+            double largeur = (orientation == Orientation.HORIZONTAL) ? type.getTaille() * TAILLE_CASE : TAILLE_CASE;
+            double hauteur = (orientation == Orientation.VERTICAL) ? type.getTaille() * TAILLE_CASE : TAILLE_CASE;
+            return mouseX >= x && mouseX <= x + largeur && mouseY >= y && mouseY <= y + hauteur;
+        }
+    }
 }
