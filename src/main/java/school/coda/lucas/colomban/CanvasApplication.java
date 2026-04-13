@@ -1,6 +1,5 @@
 package school.coda.lucas.colomban;
 
-import javafx.application.Application;
 import javafx.animation.PauseTransition;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -8,6 +7,7 @@ import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.TextArea;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
@@ -17,7 +17,6 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-
 import school.coda.lucas.colomban.modele.Bateau;
 import school.coda.lucas.colomban.modele.Grille;
 import school.coda.lucas.colomban.modele.JoueurOrdi;
@@ -27,7 +26,7 @@ import school.coda.lucas.colomban.modele.TypeBateau;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CanvasApplication extends Application {
+public class CanvasApplication {
     private MediaPlayer lecteurMusiqueJeu;
     private javafx.scene.media.AudioClip sonTouche;
     private javafx.scene.media.AudioClip sonCoule;
@@ -35,7 +34,7 @@ public class CanvasApplication extends Application {
 
     private boolean enPhaseDePlacement = true;
     private boolean tourDuJoueur = true;
-    private javafx.scene.control.TextArea journalDeBord;
+    private JournalDeBord journalDeBord;
 
     private static final int TAILLE_GRILLE = 10;
     private static final int TAILLE_CASE = 30;
@@ -53,20 +52,13 @@ public class CanvasApplication extends Application {
             new school.coda.lucas.colomban.succes.GestionnaireSucces("Joueur");
 
     private List<BateauGraphique> flotte;
+
     private BateauGraphique bateauEnCoursDeDrag = null;
     private double dragOffsetX = 0;
     private double dragOffsetY = 0;
-
-    @Override
     public void start(Stage stage) {
-        journalDeBord = new javafx.scene.control.TextArea();
-        journalDeBord.setEditable(false);
-        journalDeBord.setPrefHeight(120);
-        journalDeBord.setMaxWidth(LARGEUR_CANVAS);
-
-        journalDeBord.setStyle("-fx-font-family: monospace; -fx-font-size: 14px; -fx-font-weight: bold;");
-        journalDeBord.appendText(">> Placez vos 5 bateaux sur la grille de gauche.\n");
-
+        journalDeBord = new JournalDeBord();
+        journalDeBord.appendText("Placez vos 5 bateaux sur la grille de gauche.");
         java.net.URL cheminMusique = getClass().getResource("/school/coda/lucas/colomban/audio/musique_combat.mp3");
         if (cheminMusique != null) {
             javafx.scene.media.Media media = new javafx.scene.media.Media(cheminMusique.toExternalForm());
@@ -194,7 +186,7 @@ public class CanvasApplication extends Application {
                 double my = event.getY();
 
                 if (mx >= DECALAGE_RADAR && mx < DECALAGE_RADAR + (TAILLE_GRILLE * TAILLE_CASE) &&
-                        my >= MARGE && my < MARGE + (TAILLE_GRILLE * TAILLE_CASE)) {
+                    my >= MARGE && my < MARGE + (TAILLE_GRILLE * TAILLE_CASE)) {
 
                     int caseX = (int) ((mx - DECALAGE_RADAR) / TAILLE_CASE);
                     int caseY = (int) ((my - MARGE) / TAILLE_CASE);
@@ -203,16 +195,16 @@ public class CanvasApplication extends Application {
                     boolean[][] rates = ordi.getSaGrille().getTirsRates();
 
                     if (touches[caseY][caseX] || rates[caseY][caseX]) {
-                        journalDeBord.appendText(">> ATTENTION : Case " + (char)('A' + caseY) + "-" + (caseX + 1) + " déjà ciblée ! Tir annulé.\n");
+                        journalDeBord.appendText("ATTENTION : Case " + (char) ('A' + caseY) + "-" + (caseX + 1) + " déjà ciblée ! Tir annulé.");
                         return;
                     }
 
                     tourDuJoueur = false;
-                    journalDeBord.appendText("--- TOUR " + numeroTour + " ---\n");
+                    journalDeBord.appendTour(numeroTour);
 
                     boolean aTouche = ordi.getSaGrille().recevoirTir(caseX, caseY);
                     String messageTirJoueur = ordi.getSaGrille().getDernierMessage();
-                    journalDeBord.appendText("VOUS  : " + messageTirJoueur + "\n");
+                    journalDeBord.appendTir("VOUS", messageTirJoueur);
 
                     if (ordi.getSaGrille().estFlotteCoulee()) {
 
@@ -237,7 +229,8 @@ public class CanvasApplication extends Application {
                     pause.setOnFinished(e -> {
                         ordi.jouerTour(maGrille);
                         String messageTirOrdi = maGrille.getDernierMessage();
-                        journalDeBord.appendText("ORDI  : " + messageTirOrdi + "\n\n");
+                        journalDeBord.appendTir("ORDI", messageTirOrdi);
+                        journalDeBord.appendBlankLine();
 
                         numeroTour++;
 
@@ -272,7 +265,7 @@ public class CanvasApplication extends Application {
         btnCombattre.setOnAction(e -> {
             boolean tousPlaces = true;
             for (BateauGraphique b : flotte) {
-                if (!b.estPlace){
+                if (!b.estPlace) {
                     tousPlaces = false;
                     break;
                 }
@@ -294,7 +287,7 @@ public class CanvasApplication extends Application {
 
         VBox conteneur = new VBox(15);
         conteneur.setAlignment(Pos.CENTER);
-        conteneur.getChildren().addAll(group, btnCombattre, journalDeBord);
+        conteneur.getChildren().addAll(group, btnCombattre, journalDeBord.getTextArea());
 
         BorderPane root = new BorderPane(conteneur);
         root.setPadding(new Insets(10));
@@ -408,7 +401,8 @@ public class CanvasApplication extends Application {
             stage.setFullScreenExitHint("");
             stage.setFullScreen(true);
         } catch (java.io.IOException e) {
-            System.err.println("Erreur lors du chargement de l'écran de fin : " + e.getMessage());        }
+            System.err.println("Erreur lors du chargement de l'écran de fin : " + e.getMessage());
+        }
     }
 
     private void afficherAlertesSucces(List<String> nouveauxSucces) {
@@ -421,7 +415,43 @@ public class CanvasApplication extends Application {
         }
     }
 
-}
+    private static class JournalDeBord {
+
+        private final TextArea textArea;
+        public JournalDeBord() {
+            textArea = new TextArea();
+            textArea.setEditable(false);
+            textArea.setPrefHeight(120);
+            textArea.setMaxWidth(LARGEUR_CANVAS);
+
+            textArea.setStyle("-fx-font-family: monospace; -fx-font-size: 14px; -fx-font-weight: bold;");
+        }
+
+        public void appendText(String text) {
+            textArea.appendText(">> " + text);
+            appendBlankLine();
+        }
+
+        public void appendTir(String player, String message) {
+            textArea.appendText(player + "  : " + message);
+            appendBlankLine();
+        }
+
+        public void appendTour(int numeroTour) {
+            textArea.appendText("--- TOUR " + numeroTour + " ---");
+            appendBlankLine();
+        }
+
+        public void appendBlankLine() {
+            textArea.appendText("\n");
+        }
+
+        /** @return inner javaFx component to be added in JavaFx container */
+        public TextArea getTextArea() {
+            return textArea;
+        }
+    }
+
     private static class BateauGraphique {
         TypeBateau type;
         Orientation orientation = Orientation.HORIZONTAL;
@@ -445,3 +475,12 @@ public class CanvasApplication extends Application {
         }
     }
 }
+
+
+
+
+
+
+
+
+
