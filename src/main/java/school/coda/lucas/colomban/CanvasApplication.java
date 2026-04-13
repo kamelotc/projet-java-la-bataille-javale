@@ -226,14 +226,14 @@ public class CanvasApplication {
 
                         afficherEcranFin("DÉFAITE...\nL'ordinateur a coulé tous vos navires.", stage);
                         return;
+                    }
+
+                    if (messageTirOrdi.contains("Touché-Coulé")) {
+                        if (sonCoule != null) sonCoule.play();
+                    } else if (messageTirOrdi.contains("Touché")) {
+                        if (sonTouche != null) sonTouche.play();
                     } else {
-                        if (messageTirOrdi.contains("Touché-Coulé")) {
-                            if (sonCoule != null) sonCoule.play();
-                        } else if (messageTirOrdi.contains("Touché")) {
-                            if (sonTouche != null) sonTouche.play();
-                        } else {
-                            if (sonRate != null) sonRate.play();
-                        }
+                        if (sonRate != null) sonRate.play();
                     }
 
                     rafraichirEcran(gc);
