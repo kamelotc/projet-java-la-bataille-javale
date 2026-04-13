@@ -61,4 +61,8 @@ public class JoueurOrdi {
 
         return touches[caseY][caseX] || rates[caseY][caseX];
     }
+
+    public boolean recevoirTir(int caseX, int caseY) {
+        return saGrille.recevoirTir(caseX, caseY);
+    }
 }
