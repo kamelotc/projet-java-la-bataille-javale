@@ -65,4 +65,8 @@ public class JoueurOrdi {
     public boolean recevoirTir(int caseX, int caseY) {
         return saGrille.recevoirTir(caseX, caseY);
     }
+
+    public String getDernierMessage() {
+        return saGrille.getDernierMessage();
+    }
 }

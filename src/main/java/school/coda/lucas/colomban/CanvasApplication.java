@@ -188,7 +188,7 @@ public class CanvasApplication {
                 journalDeBord.appendTour(numeroTour);
 
                 boolean aTouche = ordi.recevoirTir(caseX, caseY);
-                String messageTirJoueur = ordi.getSaGrille().getDernierMessage();
+                String messageTirJoueur = ordi.getDernierMessage();
                 journalDeBord.appendTir("VOUS", messageTirJoueur);
 
                 if (ordi.getSaGrille().estFlotteCoulee()) {
