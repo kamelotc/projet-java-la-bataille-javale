@@ -493,10 +493,6 @@ public class CanvasApplication {
         private AudioClip sonRate;
 
         public LecteurMusiqueJeu() {
-            initSoundBox();
-        }
-
-        private void initSoundBox() {
             URL cheminMusique = LecteurMusiqueJeu.class.getResource("/school/coda/lucas/colomban/audio/musique_combat.mp3");
             if (cheminMusique != null) {
                 Media media = new Media(cheminMusique.toExternalForm());
