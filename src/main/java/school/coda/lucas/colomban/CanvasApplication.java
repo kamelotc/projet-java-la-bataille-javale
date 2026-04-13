@@ -257,6 +257,12 @@ public class CanvasApplication {
         String messageTirJoueur = ordi.getDernierMessage();
         journalDeBord.appendTir("VOUS", messageTirJoueur);
 
+        playSoundForAction(messageTirJoueur, aTouche);
+
+        rafraichirEcran(gc);
+    }
+
+    private void playSoundForAction(String messageTirJoueur, boolean aTouche) {
         if (messageTirJoueur.contains("Touché-Coulé")) {
             if (sonCoule != null) sonCoule.play();
         } else if (aTouche) {
@@ -264,8 +270,6 @@ public class CanvasApplication {
         } else {
             if (sonRate != null) sonRate.play();
         }
-
-        rafraichirEcran(gc);
     }
 
     private void tirDeLOrdi(Stage stage, GraphicsContext gc) {
@@ -285,13 +289,7 @@ public class CanvasApplication {
             return;
         }
 
-        if (messageTirOrdi.contains("Touché-Coulé")) {
-            if (sonCoule != null) sonCoule.play();
-        } else if (messageTirOrdi.contains("Touché")) {
-            if (sonTouche != null) sonTouche.play();
-        } else {
-            if (sonRate != null) sonRate.play();
-        }
+        playSoundForAction(messageTirOrdi, messageTirOrdi.contains("Touché"));
 
         rafraichirEcran(gc);
         tourDuJoueur = true;
