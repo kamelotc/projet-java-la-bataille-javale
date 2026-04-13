@@ -69,4 +69,8 @@ public class JoueurOrdi {
     public String getDernierMessage() {
         return saGrille.getDernierMessage();
     }
+
+    public boolean estVaincu() {
+        return saGrille.estFlotteCoulee();
+    }
 }

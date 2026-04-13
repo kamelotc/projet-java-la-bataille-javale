@@ -191,7 +191,7 @@ public class CanvasApplication {
                 String messageTirJoueur = ordi.getDernierMessage();
                 journalDeBord.appendTir("VOUS", messageTirJoueur);
 
-                if (ordi.getSaGrille().estFlotteCoulee()) {
+                if (ordi.estVaincu()) {
 
                     List<String> nouveauxSucces = gestionnaireSucces.validerFinDePartie(true, numeroTour);
                     afficherAlertesSucces(nouveauxSucces);
