@@ -493,8 +493,7 @@ public class CanvasApplication {
         private AudioClip sonRate;
 
         public LecteurMusiqueJeu() {
-            String s = "musique_combat.mp3";
-            URL cheminMusique = LecteurMusiqueJeu.class.getResource("/school/coda/lucas/colomban/audio/" + s);
+            URL cheminMusique = getAudioFileUrl("musique_combat.mp3");
             if (cheminMusique != null) {
                 Media media = new Media(cheminMusique.toExternalForm());
                 lecteurMusiqueJeu = new MediaPlayer(media);
@@ -505,26 +504,27 @@ public class CanvasApplication {
                 System.out.println("Musique du jeu introuvable !");
             }
 
-            String s1 = "spas-12.mp3";
-            URL cheminSonTouche = LecteurMusiqueJeu.class.getResource("/school/coda/lucas/colomban/audio/" + s1);
+            URL cheminSonTouche = getAudioFileUrl("spas-12.mp3");
             if (cheminSonTouche != null) {
                 sonTouche = new AudioClip(cheminSonTouche.toExternalForm());
                 sonTouche.setVolume(0.8);
             }
 
-            String s2 = "bruit-coule.mp3";
-            URL cheminSonCoule = LecteurMusiqueJeu.class.getResource("/school/coda/lucas/colomban/audio/" + s2);
+            URL cheminSonCoule = getAudioFileUrl("bruit-coule.mp3");
             if (cheminSonCoule != null) {
                 sonCoule = new AudioClip(cheminSonCoule.toExternalForm());
                 sonCoule.setVolume(1.0);
             }
 
-            String s3 = "bruh.mp3";
-            URL cheminSonRate = LecteurMusiqueJeu.class.getResource("/school/coda/lucas/colomban/audio/" + s3);
+            URL cheminSonRate = getAudioFileUrl("bruh.mp3");
             if (cheminSonRate != null) {
                 sonRate = new AudioClip(cheminSonRate.toExternalForm());
                 sonRate.setVolume(1.0);
             }
+        }
+
+        private URL getAudioFileUrl(String s) {
+            return LecteurMusiqueJeu.class.getResource("/school/coda/lucas/colomban/audio/" + s);
         }
 
         private void playSoundForAction(String messageTirJoueur, boolean aTouche, CanvasApplication canvasApplication) {
