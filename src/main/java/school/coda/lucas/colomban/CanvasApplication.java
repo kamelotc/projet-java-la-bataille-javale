@@ -10,7 +10,6 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.TextArea;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
@@ -67,7 +66,7 @@ public class CanvasApplication {
     private LecteurMusiqueJeu lecteur;
 
     public void start(Stage stage) {
-        journalDeBord = new JournalDeBord();
+        journalDeBord = new JournalDeBord(LARGEUR_CANVAS);
         journalDeBord.appendText("Placez vos 5 bateaux sur la grille de gauche.");
         lecteur = new LecteurMusiqueJeu();
         lecteur.startMusic();
@@ -356,46 +355,6 @@ public class CanvasApplication {
             alert.setHeaderText(null);
             alert.setContentText("🏆 Nouveau succès : " + succes + " 🏆");
             alert.showAndWait();
-        }
-    }
-
-    private static class JournalDeBord {
-
-        private final TextArea textArea;
-
-        public JournalDeBord() {
-            textArea = new TextArea();
-            textArea.setEditable(false);
-            textArea.setPrefHeight(120);
-            textArea.setMaxWidth(LARGEUR_CANVAS);
-
-            textArea.setStyle("-fx-font-family: monospace; -fx-font-size: 14px; -fx-font-weight: bold;");
-        }
-
-        public void appendText(String text) {
-            textArea.appendText(">> " + text);
-            appendBlankLine();
-        }
-
-        public void appendTir(String player, String message) {
-            textArea.appendText(player + "  : " + message);
-            appendBlankLine();
-        }
-
-        public void appendTour(int numeroTour) {
-            textArea.appendText("--- TOUR " + numeroTour + " ---");
-            appendBlankLine();
-        }
-
-        public void appendBlankLine() {
-            textArea.appendText("\n");
-        }
-
-        /**
-         * @return inner javaFx component to be added in JavaFx container
-         */
-        public TextArea getTextArea() {
-            return textArea;
         }
     }
 
