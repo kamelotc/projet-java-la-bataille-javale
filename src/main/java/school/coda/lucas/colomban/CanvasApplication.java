@@ -37,6 +37,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CanvasApplication {
+
     private MediaPlayer lecteurMusiqueJeu;
     private AudioClip sonTouche;
     private AudioClip sonCoule;
@@ -524,6 +525,9 @@ public class CanvasApplication {
             this.x = x;
             this.y = y;
         }
+    }
+    private class LecteurMusiqueJeu{
+
     }
 }
 
