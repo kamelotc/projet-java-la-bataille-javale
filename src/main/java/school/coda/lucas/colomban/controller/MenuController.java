@@ -17,11 +17,8 @@ import java.net.URL;
 
 public class MenuController {
 
-    @FXML
     private static MediaPlayer lecteurMusique;
-    public Label welcomeText;
 
-    @FXML
     public void initialize() {
         if (lecteurMusique == null) {
             URL cheminMusique = getClass().getResource("/school/coda/lucas/colomban/audio/elden_ring.mp3");
