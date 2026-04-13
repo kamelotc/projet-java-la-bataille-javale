@@ -1,36 +1,45 @@
 package school.coda.lucas.colomban;
 
 import javafx.animation.PauseTransition;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.media.AudioClip;
+import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import school.coda.lucas.colomban.controller.GameOverController;
 import school.coda.lucas.colomban.modele.Bateau;
 import school.coda.lucas.colomban.modele.Grille;
 import school.coda.lucas.colomban.modele.JoueurOrdi;
 import school.coda.lucas.colomban.modele.Orientation;
 import school.coda.lucas.colomban.modele.TypeBateau;
+import school.coda.lucas.colomban.succes.GestionnaireSucces;
 
+import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
 public class CanvasApplication {
     private MediaPlayer lecteurMusiqueJeu;
-    private javafx.scene.media.AudioClip sonTouche;
-    private javafx.scene.media.AudioClip sonCoule;
-    private javafx.scene.media.AudioClip sonRate;
+    private AudioClip sonTouche;
+    private AudioClip sonCoule;
+    private AudioClip sonRate;
 
     private boolean enPhaseDePlacement = true;
     private boolean tourDuJoueur = true;
@@ -48,43 +57,44 @@ public class CanvasApplication {
     private SystemeDeTir monSystemeDeTir;
 
     private int numeroTour = 1;
-    private school.coda.lucas.colomban.succes.GestionnaireSucces gestionnaireSucces =
-            new school.coda.lucas.colomban.succes.GestionnaireSucces("Joueur");
+    private GestionnaireSucces gestionnaireSucces =
+            new GestionnaireSucces("Joueur");
 
     private List<BateauGraphique> flotte;
 
     private BateauGraphique bateauEnCoursDeDrag = null;
     private double dragOffsetX = 0;
     private double dragOffsetY = 0;
+
     public void start(Stage stage) {
         journalDeBord = new JournalDeBord();
         journalDeBord.appendText("Placez vos 5 bateaux sur la grille de gauche.");
-        java.net.URL cheminMusique = getClass().getResource("/school/coda/lucas/colomban/audio/musique_combat.mp3");
+        URL cheminMusique = getClass().getResource("/school/coda/lucas/colomban/audio/musique_combat.mp3");
         if (cheminMusique != null) {
-            javafx.scene.media.Media media = new javafx.scene.media.Media(cheminMusique.toExternalForm());
-            lecteurMusiqueJeu = new javafx.scene.media.MediaPlayer(media);
-            lecteurMusiqueJeu.setCycleCount(javafx.scene.media.MediaPlayer.INDEFINITE);
+            Media media = new Media(cheminMusique.toExternalForm());
+            lecteurMusiqueJeu = new MediaPlayer(media);
+            lecteurMusiqueJeu.setCycleCount(MediaPlayer.INDEFINITE);
             lecteurMusiqueJeu.setVolume(0.4);
             lecteurMusiqueJeu.play();
         } else {
             System.out.println("Musique du jeu introuvable !");
         }
 
-        java.net.URL cheminSonTouche = getClass().getResource("/school/coda/lucas/colomban/audio/spas-12.mp3");
+        URL cheminSonTouche = getClass().getResource("/school/coda/lucas/colomban/audio/spas-12.mp3");
         if (cheminSonTouche != null) {
-            sonTouche = new javafx.scene.media.AudioClip(cheminSonTouche.toExternalForm());
+            sonTouche = new AudioClip(cheminSonTouche.toExternalForm());
             sonTouche.setVolume(0.8);
         }
 
-        java.net.URL cheminSonCoule = getClass().getResource("/school/coda/lucas/colomban/audio/bruit-coule.mp3");
+        URL cheminSonCoule = getClass().getResource("/school/coda/lucas/colomban/audio/bruit-coule.mp3");
         if (cheminSonCoule != null) {
-            sonCoule = new javafx.scene.media.AudioClip(cheminSonCoule.toExternalForm());
+            sonCoule = new AudioClip(cheminSonCoule.toExternalForm());
             sonCoule.setVolume(1.0);
         }
 
-        java.net.URL cheminSonRate = getClass().getResource("/school/coda/lucas/colomban/audio/bruh.mp3");
+        URL cheminSonRate = getClass().getResource("/school/coda/lucas/colomban/audio/bruh.mp3");
         if (cheminSonRate != null) {
-            sonRate = new javafx.scene.media.AudioClip(cheminSonRate.toExternalForm());
+            sonRate = new AudioClip(cheminSonRate.toExternalForm());
             sonRate.setVolume(1.0);
         }
 
@@ -261,7 +271,7 @@ public class CanvasApplication {
 
         rafraichirEcran(gc);
 
-        javafx.scene.control.Button btnCombattre = new javafx.scene.control.Button("Combattre");
+        Button btnCombattre = new Button("Combattre");
         btnCombattre.setOnAction(e -> {
             boolean tousPlaces = true;
             for (BateauGraphique b : flotte) {
@@ -293,7 +303,7 @@ public class CanvasApplication {
         root.setPadding(new Insets(10));
 
         Scene scene = new Scene(root, LARGEUR_CANVAS + 20, HAUTEUR_CANVAS + 160);
-        java.net.URL cssUrl = getClass().getResource("/school/coda/lucas/colomban/style.css");
+        URL cssUrl = getClass().getResource("/school/coda/lucas/colomban/style.css");
         if (cssUrl != null) {
             scene.getStylesheets().add(cssUrl.toExternalForm());
         }
@@ -390,24 +400,24 @@ public class CanvasApplication {
         }
 
         try {
-            javafx.fxml.FXMLLoader fxmlLoader = new javafx.fxml.FXMLLoader(school.coda.lucas.colomban.Main.class.getResource("game-over-view.fxml"));
+            FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("game-over-view.fxml"));
             Scene scene = new Scene(fxmlLoader.load(), 800, 800);
 
-            school.coda.lucas.colomban.controller.GameOverController controller = fxmlLoader.getController();
+            GameOverController controller = fxmlLoader.getController();
             controller.setWinnerMessage(message);
 
             stage.setScene(scene);
             stage.setTitle("Fin de la Bataille !");
             stage.setFullScreenExitHint("");
             stage.setFullScreen(true);
-        } catch (java.io.IOException e) {
+        } catch (IOException e) {
             System.err.println("Erreur lors du chargement de l'écran de fin : " + e.getMessage());
         }
     }
 
     private void afficherAlertesSucces(List<String> nouveauxSucces) {
         for (String succes : nouveauxSucces) {
-            javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setTitle("Succès Débloqué !");
             alert.setHeaderText(null);
             alert.setContentText("🏆 Nouveau succès : " + succes + " 🏆");
@@ -418,6 +428,7 @@ public class CanvasApplication {
     private static class JournalDeBord {
 
         private final TextArea textArea;
+
         public JournalDeBord() {
             textArea = new TextArea();
             textArea.setEditable(false);
@@ -446,7 +457,9 @@ public class CanvasApplication {
             textArea.appendText("\n");
         }
 
-        /** @return inner javaFx component to be added in JavaFx container */
+        /**
+         * @return inner javaFx component to be added in JavaFx container
+         */
         public TextArea getTextArea() {
             return textArea;
         }
