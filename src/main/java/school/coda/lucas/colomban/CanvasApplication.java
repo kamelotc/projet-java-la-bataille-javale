@@ -12,6 +12,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
 import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.media.AudioClip;
@@ -120,6 +121,7 @@ public class CanvasApplication {
 
         canvas.setOnMousePressed(event -> {
             if (!enPhaseDePlacement) return;
+
             double mx = event.getX();
             double my = event.getY();
 
@@ -164,84 +166,21 @@ public class CanvasApplication {
             if (enPhaseDePlacement) return;
             if (!tourDuJoueur) return;
             if (event.getClickCount() > 1) return;
+            if (event.getButton() != MouseButton.PRIMARY) return;
 
-            if (event.getButton() == MouseButton.PRIMARY) {
-                double mx = event.getX();
-                double my = event.getY();
+            tirDuJoueur(event, gc);
+            if (ordi.estVaincu()) {
+                List<String> nouveauxSucces = gestionnaireSucces.validerFinDePartie(true, numeroTour);
+                afficherAlertesSucces(nouveauxSucces);
 
-                boolean horsGrille = !(mx >= DECALAGE_RADAR) || !(mx < DECALAGE_RADAR + (TAILLE_GRILLE * TAILLE_CASE)) ||
-                                     !(my >= MARGE) || !(my < MARGE + (TAILLE_GRILLE * TAILLE_CASE));
-
-                if (horsGrille) {
-                    return;
-                }
-
-                int caseX = (int) ((mx - DECALAGE_RADAR) / TAILLE_CASE);
-                int caseY = (int) ((my - MARGE) / TAILLE_CASE);
-
-                if (ordi.isDejaCible(caseY, caseX)) {
-                    journalDeBord.appendText("ATTENTION : Case " + (char) ('A' + caseY) + "-" + (caseX + 1) + " déjà ciblée ! Tir annulé.");
-                    return;
-                }
-
-                tourDuJoueur = false;
-                journalDeBord.appendTour(numeroTour);
-
-                boolean aTouche = ordi.recevoirTir(caseX, caseY);
-                String messageTirJoueur = ordi.getDernierMessage();
-                journalDeBord.appendTir("VOUS", messageTirJoueur);
-
-                if (ordi.estVaincu()) {
-
-                    List<String> nouveauxSucces = gestionnaireSucces.validerFinDePartie(true, numeroTour);
-                    afficherAlertesSucces(nouveauxSucces);
-
-                    afficherEcranFin("FÉLICITATIONS !\nVous avez détruit la flotte ennemie !", stage);
-                    return;
-                }
-
-                if (messageTirJoueur.contains("Touché-Coulé")) {
-                    if (sonCoule != null) sonCoule.play();
-                } else if (aTouche) {
-                    if (sonTouche != null) sonTouche.play();
-                } else {
-                    if (sonRate != null) sonRate.play();
-                }
-
-                rafraichirEcran(gc);
-
-                PauseTransition pause = new PauseTransition(Duration.seconds(1));
-                pause.setOnFinished(e -> {
-                    ordi.jouerTour(maGrille);
-                    String messageTirOrdi = maGrille.getDernierMessage();
-                    journalDeBord.appendTir("ORDI", messageTirOrdi);
-                    journalDeBord.appendBlankLine();
-
-                    numeroTour++;
-
-                    if (maGrille.estFlotteCoulee()) {
-
-                        List<String> nouveauxSucces = gestionnaireSucces.validerFinDePartie(false, numeroTour);
-                        afficherAlertesSucces(nouveauxSucces);
-
-                        afficherEcranFin("DÉFAITE...\nL'ordinateur a coulé tous vos navires.", stage);
-                        return;
-                    }
-
-                    if (messageTirOrdi.contains("Touché-Coulé")) {
-                        if (sonCoule != null) sonCoule.play();
-                    } else if (messageTirOrdi.contains("Touché")) {
-                        if (sonTouche != null) sonTouche.play();
-                    } else {
-                        if (sonRate != null) sonRate.play();
-                    }
-
-                    rafraichirEcran(gc);
-                    tourDuJoueur = true;
-                });
-                pause.play();
-
+                afficherEcranFin("FÉLICITATIONS !\nVous avez détruit la flotte ennemie !", stage);
+                return;
             }
+
+            PauseTransition pause = new PauseTransition(Duration.seconds(1));
+            pause.setOnFinished(_ -> tirDeLOrdi(stage, gc));
+            pause.play();
+
         });
 
         rafraichirEcran(gc);
@@ -290,6 +229,72 @@ public class CanvasApplication {
         stage.show();
         stage.setFullScreenExitHint("");
         stage.setFullScreen(true);
+    }
+
+    private void tirDuJoueur(MouseEvent event, GraphicsContext gc) {
+        double mx = event.getX();
+        double my = event.getY();
+
+        boolean horsGrille = !(mx >= DECALAGE_RADAR) || !(mx < DECALAGE_RADAR + (TAILLE_GRILLE * TAILLE_CASE)) ||
+                             !(my >= MARGE) || !(my < MARGE + (TAILLE_GRILLE * TAILLE_CASE));
+
+        if (horsGrille) {
+            return;
+        }
+
+        int caseX = (int) ((mx - DECALAGE_RADAR) / TAILLE_CASE);
+        int caseY = (int) ((my - MARGE) / TAILLE_CASE);
+
+        if (ordi.isDejaCible(caseY, caseX)) {
+            journalDeBord.appendText("ATTENTION : Case " + (char) ('A' + caseY) + "-" + (caseX + 1) + " déjà ciblée ! Tir annulé.");
+            return;
+        }
+
+        tourDuJoueur = false;
+        journalDeBord.appendTour(numeroTour);
+
+        boolean aTouche = ordi.recevoirTir(caseX, caseY);
+        String messageTirJoueur = ordi.getDernierMessage();
+        journalDeBord.appendTir("VOUS", messageTirJoueur);
+
+        if (messageTirJoueur.contains("Touché-Coulé")) {
+            if (sonCoule != null) sonCoule.play();
+        } else if (aTouche) {
+            if (sonTouche != null) sonTouche.play();
+        } else {
+            if (sonRate != null) sonRate.play();
+        }
+
+        rafraichirEcran(gc);
+    }
+
+    private void tirDeLOrdi(Stage stage, GraphicsContext gc) {
+        ordi.jouerTour(maGrille);
+        String messageTirOrdi = maGrille.getDernierMessage();
+        journalDeBord.appendTir("ORDI", messageTirOrdi);
+        journalDeBord.appendBlankLine();
+
+        numeroTour++;
+
+        if (maGrille.estFlotteCoulee()) {
+
+            List<String> nouveauxSucces = gestionnaireSucces.validerFinDePartie(false, numeroTour);
+            afficherAlertesSucces(nouveauxSucces);
+
+            afficherEcranFin("DÉFAITE...\nL'ordinateur a coulé tous vos navires.", stage);
+            return;
+        }
+
+        if (messageTirOrdi.contains("Touché-Coulé")) {
+            if (sonCoule != null) sonCoule.play();
+        } else if (messageTirOrdi.contains("Touché")) {
+            if (sonTouche != null) sonTouche.play();
+        } else {
+            if (sonRate != null) sonRate.play();
+        }
+
+        rafraichirEcran(gc);
+        tourDuJoueur = true;
     }
 
     private void rafraichirEcran(GraphicsContext gc) {
