@@ -46,6 +46,7 @@ public class GameController {
     private static final int DECALAGE_RADAR = 400;
     private static final int LARGEUR_CANVAS = 800;
     private static final int HAUTEUR_CANVAS = 600;
+    private static final int COMPUTER_DELAY_MS = 100;
 
     private final Stage stage;
     private final Canvas canvas;
@@ -175,7 +176,7 @@ public class GameController {
             return;
         }
 
-        PauseTransition pause = new PauseTransition(Duration.seconds(1));
+        PauseTransition pause = new PauseTransition(Duration.millis(COMPUTER_DELAY_MS));
         pause.setOnFinished(_ -> tirDeLOrdi());
         pause.play();
 
@@ -357,8 +358,7 @@ public class GameController {
     }
 
     private void afficherEcranFin(String message) {
-        lecteur.stopMusicCombat();
-
+        lecteur.stopAllAudio();
 
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("game-over-view.fxml"));
