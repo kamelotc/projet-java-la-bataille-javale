@@ -6,8 +6,8 @@ import java.util.Arrays;
 import java.util.List;
 
 public class GestionnaireSucces {
-    private StatistiquesDb statsDb;
-    private String nomDuJoueur;
+    private final StatistiquesDb statsDb;
+    private final String nomDuJoueur;
 
     public static final List<String> TOUS_LES_SUCCES = Arrays.asList(
             "Gagner une partie",

@@ -166,6 +166,7 @@ public class GameController {
         if (!tirEnvoye) {
             return;
         }
+
         if (ordi.estVaincu()) {
             List<String> nouveauxSucces = gestionnaireSucces.validerFinDePartie(true, numeroTour);
             afficherAlertesSucces(nouveauxSucces);
