@@ -16,7 +16,7 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 import school.coda.lucas.colomban.Main;
 import school.coda.lucas.colomban.gui.BateauGraphique;
-import school.coda.lucas.colomban.gui.CanvasGameBoard;
+import school.coda.lucas.colomban.gui.GameBoard;
 import school.coda.lucas.colomban.gui.JournalDeBord;
 import school.coda.lucas.colomban.gui.LecteurAudio;
 import school.coda.lucas.colomban.modele.Grille;
@@ -43,7 +43,7 @@ public class GameController {
     private final LecteurAudio lecteur;
     private final JoueurOrdi ordi;
     private final List<BateauGraphique> flotte;
-    private final CanvasGameBoard canvasGameBoard;
+    private final GameBoard gameBoard;
 
     private boolean enPhaseDePlacement = true;
     private int numeroTour = 1;
@@ -55,8 +55,8 @@ public class GameController {
     public GameController(Stage stage) {
         this.stage = stage;
 
-        canvasGameBoard = new CanvasGameBoard();
-        journalDeBord = new JournalDeBord(CanvasGameBoard.LARGEUR_CANVAS);
+        gameBoard = new GameBoard();
+        journalDeBord = new JournalDeBord(GameBoard.LARGEUR_CANVAS);
         journalDeBord.appendText("Placez vos 5 bateaux sur la grille de gauche.");
 
         lecteur = new LecteurAudio();
@@ -80,7 +80,7 @@ public class GameController {
 
     private Scene createScene() {
 
-        Canvas canvas = canvasGameBoard.getCanvas();
+        Canvas canvas = gameBoard.getCanvas();
         setupCanvasEventHandlers(canvas);
 
         rafraichirEcran();
@@ -97,7 +97,7 @@ public class GameController {
         BorderPane root = new BorderPane(conteneur);
         root.setPadding(new Insets(10));
 
-        Scene scene = new Scene(root, CanvasGameBoard.LARGEUR_CANVAS + 20, CanvasGameBoard.HAUTEUR_CANVAS + 160);
+        Scene scene = new Scene(root, GameBoard.LARGEUR_CANVAS + 20, GameBoard.HAUTEUR_CANVAS + 160);
         URL cssUrl = getClass().getResource("/school/coda/lucas/colomban/style.css");
         if (cssUrl != null) {
             scene.getStylesheets().add(cssUrl.toExternalForm());
@@ -238,12 +238,12 @@ public class GameController {
 
     private boolean tirDuJoueur(double mx, double my) {
 
-        if (CanvasGameBoard.estHorsGrille(mx, my)) {
+        if (GameBoard.estHorsGrille(mx, my)) {
             return false;
         }
 
-        int caseX = CanvasGameBoard.radarXCellFromPixel(mx);
-        int caseY = CanvasGameBoard.radarYCellFromPixel(my);
+        int caseX = GameBoard.radarXCellFromPixel(mx);
+        int caseY = GameBoard.radarYCellFromPixel(my);
 
         if (ordi.isDejaCible(caseY, caseX)) {
             journalDeBord.appendText("ATTENTION : Case " + (char) ('A' + caseY) + "-" + (caseX + 1) + " déjà ciblée ! Tir annulé.");
@@ -298,7 +298,7 @@ public class GameController {
     }
 
     private void rafraichirEcran() {
-        canvasGameBoard.rafraichirEcran(new CanvasGameBoard.ContexteDessinPlateau(
+        gameBoard.rafraichirEcran(new GameBoard.ContexteDessinPlateau(
                 maGrille, ordi.getSaGrille(), enPhaseDePlacement, flotte, bateauEnCoursDeDrag
         ));
     }

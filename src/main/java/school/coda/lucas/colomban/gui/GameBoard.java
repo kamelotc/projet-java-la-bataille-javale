@@ -11,7 +11,11 @@ import school.coda.lucas.colomban.modele.Orientation;
 
 import java.util.List;
 
-public class CanvasGameBoard {
+/// Logique de dessin du composant graphique représentant
+/// - la grille océan : vaisseux du joueur et tirs reçus
+/// - la grille radar : tirs envoyés
+/// - le chantier naval : vaisseaux à placer
+public class GameBoard {
 
     private static final int TAILLE_GRILLE = 10;
     public static final int TAILLE_CASE = 30;
@@ -32,7 +36,7 @@ public class CanvasGameBoard {
     private final GraphicsContext gc;
     private final SystemeDeTir monSystemeDeTir;
 
-    public CanvasGameBoard() {
+    public GameBoard() {
         this.canvas = new Canvas(LARGEUR_CANVAS, HAUTEUR_CANVAS);
         this.gc = canvas.getGraphicsContext2D();
         this.monSystemeDeTir = new SystemeDeTir(gc);

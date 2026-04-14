@@ -38,8 +38,8 @@ public class BateauGraphique {
     }
 
     public boolean contient(double mouseX, double mouseY) {
-        double largeur = (orientation == Orientation.HORIZONTAL) ? type.getTaille() * CanvasGameBoard.TAILLE_CASE : CanvasGameBoard.TAILLE_CASE;
-        double hauteur = (orientation == Orientation.VERTICAL) ? type.getTaille() * CanvasGameBoard.TAILLE_CASE : CanvasGameBoard.TAILLE_CASE;
+        double largeur = (orientation == Orientation.HORIZONTAL) ? type.getTaille() * GameBoard.TAILLE_CASE : GameBoard.TAILLE_CASE;
+        double hauteur = (orientation == Orientation.VERTICAL) ? type.getTaille() * GameBoard.TAILLE_CASE : GameBoard.TAILLE_CASE;
         return mouseX >= x && mouseX <= x + largeur && mouseY >= y && mouseY <= y + hauteur;
     }
 
@@ -73,16 +73,16 @@ public class BateauGraphique {
     }
 
     public void placerSur(Grille grille) {
-        int caseX = CanvasGameBoard.oceanXCellFromPixel(x);
-        int caseY = CanvasGameBoard.oceanYCellFromPixel(y);
+        int caseX = GameBoard.oceanXCellFromPixel(x);
+        int caseY = GameBoard.oceanYCellFromPixel(y);
         Bateau bateauTest = new Bateau(type, orientation, caseX, caseY);
 
         if (grille.placerBateau(bateauTest)) {
             estPlace = true;
             bateauLogique = bateauTest;
 
-            this.x = CanvasGameBoard.MARGE + (caseX * CanvasGameBoard.TAILLE_CASE);
-            this.y = CanvasGameBoard.MARGE + (caseY * CanvasGameBoard.TAILLE_CASE);
+            this.x = GameBoard.MARGE + (caseX * GameBoard.TAILLE_CASE);
+            this.y = GameBoard.MARGE + (caseY * GameBoard.TAILLE_CASE);
         } else {
             resetToInitialPosition();
         }
