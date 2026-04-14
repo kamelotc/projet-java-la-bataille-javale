@@ -11,7 +11,6 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -31,6 +30,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class GameController {
 
@@ -97,13 +97,7 @@ public class GameController {
 
     private Scene createScene() {
 
-        canvas.setOnMousePressed(this::onCanvasMousePressed);
-
-        canvas.setOnMouseDragged(this::onCanvasMouseDragged);
-
-        canvas.setOnMouseReleased(this::onCanvasMouseReleased);
-
-        canvas.setOnMouseClicked(this::onCanvasMouseClicked);
+        setupCanvasEventHandlers();
 
         rafraichirEcran();
 
@@ -127,6 +121,38 @@ public class GameController {
 
         root.getStyleClass().add("menu-fond-sot");
         return scene;
+    }
+
+    private void setupCanvasEventHandlers() {
+        canvas.setOnMousePressed(event1 -> {
+            if (!enPhaseDePlacement) return;
+            double mx = event1.getX();
+            double my = event1.getY();
+
+            switch (event1.getButton()) {
+                case SECONDARY -> orienterBateau(mx, my);
+                case PRIMARY -> retirerBateau(mx, my);
+            }
+        });
+
+        canvas.setOnMouseDragged(event -> {
+            if (!enPhaseDePlacement) return;
+            onPlacementMouseDragged(event.getX(), event.getY());
+        });
+
+        canvas.setOnMouseReleased(_ -> {
+            if (!enPhaseDePlacement) return;
+            onPlacementMouseReleased();
+        });
+
+        canvas.setOnMouseClicked(event -> {
+            if (enPhaseDePlacement) return;
+            if (!tourDuJoueur) return;
+            if (event.getClickCount() > 1) return;
+            if (event.getButton() != MouseButton.PRIMARY) return;
+
+            onCombatGrilleRadarClick(event.getX(), event.getY());
+        });
     }
 
     private Button createBoutonCombattre() {
@@ -157,13 +183,11 @@ public class GameController {
         return scene;
     }
 
-    private void onCanvasMouseClicked(MouseEvent event) {
-        if (enPhaseDePlacement) return;
-        if (!tourDuJoueur) return;
-        if (event.getClickCount() > 1) return;
-        if (event.getButton() != MouseButton.PRIMARY) return;
-
-        boolean tirEnvoye = tirDuJoueur(event);
+    /// - Déclenche le tir sur l'ordinateur.
+    /// - Si fin de partie -> redirection sur l'écran Game over
+    /// - Contre-attaque de l'ordinateur si la partie n'est pas terminée
+    private void onCombatGrilleRadarClick(double mouseX, double mouseY) {
+        boolean tirEnvoye = tirDuJoueur(mouseX, mouseY);
         if (!tirEnvoye) {
             return;
         }
@@ -179,11 +203,9 @@ public class GameController {
         PauseTransition pause = new PauseTransition(Duration.millis(COMPUTER_DELAY_MS));
         pause.setOnFinished(_ -> tirDeLOrdi());
         pause.play();
-
     }
 
-    private void onCanvasMouseReleased(MouseEvent e) {
-        if (!enPhaseDePlacement) return;
+    private void onPlacementMouseReleased() {
         if (bateauEnCoursDeDrag != null) {
             bateauEnCoursDeDrag.placerSur(maGrille);
             bateauEnCoursDeDrag = null;
@@ -191,43 +213,46 @@ public class GameController {
         }
     }
 
-    private void onCanvasMouseDragged(MouseEvent event) {
-        if (!enPhaseDePlacement) return;
+    private void onPlacementMouseDragged(double mouseX, double mouseY) {
         if (bateauEnCoursDeDrag != null) {
-            double x = event.getX() - dragOffsetX;
-            double y = event.getY() - dragOffsetY;
+            double x = mouseX - dragOffsetX;
+            double y = mouseY - dragOffsetY;
             bateauEnCoursDeDrag.moveToPosition(x, y);
             rafraichirEcran();
         }
     }
 
-    private void onCanvasMousePressed(MouseEvent event) {
-        if (!enPhaseDePlacement) return;
+    private void retirerBateau(double mx, double my) {
+        findBateauEn(mx, my).ifPresent(bateau -> {
+            bateau.retirerSiPlaceSur(maGrille);
+            bateauEnCoursDeDrag = bateau;
+            dragOffsetX = mx - bateau.x;
+            dragOffsetY = my - bateau.y;
+            rafraichirEcran();
+        });
+    }
 
-        double mx = event.getX();
-        double my = event.getY();
+    private void orienterBateau(double mx, double my) {
+        findBateauEn(mx, my).ifPresent(bateau -> {
+            bateau.reorienter(maGrille);
+            rafraichirEcran();
+        });
+    }
 
+    private Optional<BateauGraphique> findBateauEn(double mx, double my) {
+        BateauGraphique bateauPresentAuxCoordonnees = null;
         for (int i = flotte.size() - 1; i >= 0; i--) {
             BateauGraphique bateau = flotte.get(i);
             if (bateau.contient(mx, my)) {
-                switch (event.getButton()) {
-                    case SECONDARY -> bateau.reorienter(maGrille);
-                    case PRIMARY -> {
-                        bateau.retirerSiPlaceSur(this.maGrille);
-                        bateauEnCoursDeDrag = bateau;
-                        dragOffsetX = mx - bateau.x;
-                        dragOffsetY = my - bateau.y;
-                    }
-                }
-                rafraichirEcran();
+                bateauPresentAuxCoordonnees = bateau;
                 break;
             }
         }
+        return Optional.ofNullable(bateauPresentAuxCoordonnees);
     }
 
-    private boolean tirDuJoueur(MouseEvent event) {
-        double mx = event.getX();
-        double my = event.getY();
+
+    private boolean tirDuJoueur(double mx, double my) {
 
         boolean horsGrille = !(mx >= DECALAGE_RADAR) || !(mx < DECALAGE_RADAR + (TAILLE_GRILLE * TAILLE_CASE)) || !(my >= MARGE) || !(my < MARGE + (TAILLE_GRILLE * TAILLE_CASE));
 
@@ -274,7 +299,7 @@ public class GameController {
             return;
         }
 
-        jouerSonPourAction(messageTirOrdi, messageTirOrdi.contains("Touché"), lecteur);
+        jouerSonPourAction(messageTirOrdi, messageTirOrdi.contains("Touché"));
 
         rafraichirEcran();
         tourDuJoueur = true;
