@@ -7,6 +7,13 @@ import javafx.scene.media.MediaPlayer;
 import java.net.URL;
 import java.util.Optional;
 
+/// Lecture de sons et musiques.
+///
+/// - Lire des musiques
+/// - Lire des sons
+/// - arrêter tous les sons et musiques
+///
+/// Chargement des assets depuis les resources à la volée (lazy loading)
 public class LecteurAudio {
 
     private MediaPlayer musiqueCombat;
@@ -17,13 +24,56 @@ public class LecteurAudio {
     private AudioClip sonRate;
     private AudioClip sonGagne;
 
-    public void startMusicFin() {
-        if (musiqueFin == null) {
-            loadMusique("musique_fin.mp3").ifPresent(media -> {
-                musiqueFin = new MediaPlayer(media);
+    public void playSonGagne() {
+        if (sonGagne == null) {
+            loadSound("gagner.mp3").ifPresent(audioClip -> {
+                sonGagne = audioClip;
+                sonGagne.setVolume(1.0);
             });
         }
-        musiqueFin.play();
+        playSon(sonGagne);
+    }
+
+    public void playSonRate() {
+        if (sonRate == null) {
+            loadSound("bruh.mp3").ifPresent(audioClip -> {
+                sonRate = audioClip;
+                sonRate.setVolume(1.0);
+            });
+        }
+        playSon(sonRate);
+    }
+
+    public void playSonTouche() {
+        if (sonTouche == null) {
+            loadSound("spas-12.mp3").ifPresent(audioClip -> {
+                sonTouche = audioClip;
+                sonTouche.setVolume(0.8);
+            });
+        }
+        playSon(sonTouche);
+    }
+
+    public void playSonCoule() {
+        if (sonCoule == null) {
+            loadSound("bruit-coule.mp3").ifPresent(audioClip -> {
+                sonCoule = audioClip;
+                sonCoule.setVolume(1.0);
+            });
+        }
+        playSon(sonCoule);
+    }
+
+    private void playSon(AudioClip son) {
+        if (son != null) {
+            son.play();
+        }
+    }
+
+    private void stopSon(AudioClip son) {
+        if (son != null && son.isPlaying()) {
+            son.stop();
+        }
     }
 
     public void startMusicMenu() {
@@ -47,19 +97,13 @@ public class LecteurAudio {
         musiqueCombat.play();
     }
 
-    public void stopAllAudio() {
-        stopMusique(musiqueFin);
-        stopMusique(musiqueCombat);
-        stopSon(sonRate);
-        stopSon(sonCoule);
-        stopSon(sonTouche);
-        stopSon(sonGagne);
-    }
-
-    private void stopSon(AudioClip son) {
-        if (son != null && son.isPlaying()) {
-            son.stop();
+    public void startMusicFin() {
+        if (musiqueFin == null) {
+            loadMusique("musique_fin.mp3").ifPresent(media -> {
+                musiqueFin = new MediaPlayer(media);
+            });
         }
+        musiqueFin.play();
     }
 
     private void stopMusique(MediaPlayer musique) {
@@ -68,61 +112,13 @@ public class LecteurAudio {
         }
     }
 
-
-    public void playSoundForAction(String messageTirJoueur, boolean aTouche) {
-        if (messageTirJoueur.contains("Touché-Coulé")) {
-            playSonCoule();
-        } else if (aTouche) {
-            playSonTouche();
-        } else {
-            playSonRate();
-        }
-    }
-
-    public void playSonGagne() {
-        if (sonGagne == null) {
-            loadSound("gagner.mp3").ifPresent(audioClip -> {
-                sonGagne = audioClip;
-                sonGagne.setVolume(1.0);
-            });
-        }
-        playSon(sonGagne);
-    }
-
-    private void playSonRate() {
-        if (sonRate == null) {
-            loadSound("bruh.mp3").ifPresent(audioClip -> {
-                sonRate = audioClip;
-                sonRate.setVolume(1.0);
-            });
-        }
-        playSon(sonRate);
-    }
-
-    private void playSonTouche() {
-        if (sonTouche == null) {
-            loadSound("spas-12.mp3").ifPresent(audioClip -> {
-                sonTouche = audioClip;
-                sonTouche.setVolume(0.8);
-            });
-        }
-        playSon(sonTouche);
-    }
-
-    private void playSonCoule() {
-        if (sonCoule == null) {
-            loadSound("bruit-coule.mp3").ifPresent(audioClip -> {
-                sonCoule = audioClip;
-                sonCoule.setVolume(1.0);
-            });
-        }
-        playSon(sonCoule);
-    }
-
-    private void playSon(AudioClip son) {
-        if (son != null) {
-            son.play();
-        }
+    public void stopAllAudio() {
+        stopMusique(musiqueFin);
+        stopMusique(musiqueCombat);
+        stopSon(sonRate);
+        stopSon(sonCoule);
+        stopSon(sonTouche);
+        stopSon(sonGagne);
     }
 
     private Optional<Media> loadMusique(String musicFileName) {

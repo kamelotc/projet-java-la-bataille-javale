@@ -229,8 +229,7 @@ public class GameController {
         double mx = event.getX();
         double my = event.getY();
 
-        boolean horsGrille = !(mx >= DECALAGE_RADAR) || !(mx < DECALAGE_RADAR + (TAILLE_GRILLE * TAILLE_CASE)) ||
-                             !(my >= MARGE) || !(my < MARGE + (TAILLE_GRILLE * TAILLE_CASE));
+        boolean horsGrille = !(mx >= DECALAGE_RADAR) || !(mx < DECALAGE_RADAR + (TAILLE_GRILLE * TAILLE_CASE)) || !(my >= MARGE) || !(my < MARGE + (TAILLE_GRILLE * TAILLE_CASE));
 
         if (horsGrille) {
             return false;
@@ -251,11 +250,12 @@ public class GameController {
         String messageTirJoueur = ordi.getDernierMessage();
         journalDeBord.appendTir("VOUS", messageTirJoueur);
 
-        lecteur.playSoundForAction(messageTirJoueur, aTouche);
+        jouerSonPourAction(messageTirJoueur, aTouche);
 
         rafraichirEcran();
         return true;
     }
+
 
     private void tirDeLOrdi() {
         ordi.jouerTour(maGrille);
@@ -274,10 +274,20 @@ public class GameController {
             return;
         }
 
-        lecteur.playSoundForAction(messageTirOrdi, messageTirOrdi.contains("Touché"));
+        jouerSonPourAction(messageTirOrdi, messageTirOrdi.contains("Touché"), lecteur);
 
         rafraichirEcran();
         tourDuJoueur = true;
+    }
+
+    public void jouerSonPourAction(String messageTirJoueur, boolean aTouche) {
+        if (messageTirJoueur.contains("Touché-Coulé")) {
+            lecteur.playSonCoule();
+        } else if (aTouche) {
+            lecteur.playSonTouche();
+        } else {
+            lecteur.playSonRate();
+        }
     }
 
     private void rafraichirEcran() {
