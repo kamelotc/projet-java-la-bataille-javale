@@ -154,35 +154,6 @@ public class GameController {
             onCombatGrilleRadarClick(event.getX(), event.getY());
         });
     }
-
-    private Button createBoutonCombattre() {
-        Button btnCombattre = new Button("Combattre");
-        btnCombattre.setOnAction(_ -> {
-            boolean tousPlaces = true;
-            for (BateauGraphique b : flotte) {
-                if (!b.estPlace) {
-                    tousPlaces = false;
-                    break;
-                }
-            }
-
-            if (tousPlaces) {
-                enPhaseDePlacement = false;
-                ordi.placerBateauxAleatoirement();
-                btnCombattre.setText("Bataille en cours...");
-                btnCombattre.setDisable(true);
-                rafraichirEcran();
-            } else {
-                btnCombattre.setText("Placez toute la flotte d'abord");
-            }
-        });
-        return btnCombattre;
-    }
-
-    public Scene getScene() {
-        return scene;
-    }
-
     /// - Déclenche le tir sur l'ordinateur.
     /// - Si fin de partie -> redirection sur l'écran Game over
     /// - Contre-attaque de l'ordinateur si la partie n'est pas terminée
@@ -222,6 +193,34 @@ public class GameController {
         }
     }
 
+    private Button createBoutonCombattre() {
+        Button btnCombattre = new Button("Combattre");
+        btnCombattre.setOnAction(_ -> {
+            boolean tousPlaces = true;
+            for (BateauGraphique b : flotte) {
+                if (!b.estPlace) {
+                    tousPlaces = false;
+                    break;
+                }
+            }
+
+            if (tousPlaces) {
+                enPhaseDePlacement = false;
+                ordi.placerBateauxAleatoirement();
+                btnCombattre.setText("Bataille en cours...");
+                btnCombattre.setDisable(true);
+                rafraichirEcran();
+            } else {
+                btnCombattre.setText("Placez toute la flotte d'abord");
+            }
+        });
+        return btnCombattre;
+    }
+
+    public Scene getScene() {
+        return scene;
+    }
+
     private void retirerBateau(double mx, double my) {
         findBateauEn(mx, my).ifPresent(bateau -> {
             bateau.retirerSiPlaceSur(maGrille);
@@ -251,7 +250,6 @@ public class GameController {
         return Optional.ofNullable(bateauPresentAuxCoordonnees);
     }
 
-
     private boolean tirDuJoueur(double mx, double my) {
 
         boolean horsGrille = !(mx >= DECALAGE_RADAR) || !(mx < DECALAGE_RADAR + (TAILLE_GRILLE * TAILLE_CASE)) || !(my >= MARGE) || !(my < MARGE + (TAILLE_GRILLE * TAILLE_CASE));
@@ -280,7 +278,6 @@ public class GameController {
         rafraichirEcran();
         return true;
     }
-
 
     private void tirDeLOrdi() {
         ordi.jouerTour(maGrille);
@@ -315,6 +312,9 @@ public class GameController {
         }
     }
 
+    /// Redessine la zone de jeu
+    /// - Grille océan : flotte du joueur et tirs reçus
+    /// - Grille radar : tirs envoyés
     private void rafraichirEcran() {
         gc.clearRect(0, 0, LARGEUR_CANVAS, HAUTEUR_CANVAS);
 
