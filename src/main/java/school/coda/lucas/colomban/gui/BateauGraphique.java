@@ -7,6 +7,9 @@ import school.coda.lucas.colomban.modele.Grille;
 import school.coda.lucas.colomban.modele.Orientation;
 import school.coda.lucas.colomban.modele.TypeBateau;
 
+import static school.coda.lucas.colomban.gui.GameBoard.MARGE;
+import static school.coda.lucas.colomban.gui.GameBoard.TAILLE_CASE;
+
 public class BateauGraphique {
     private final TypeBateau type;
     private final double startX;
@@ -26,8 +29,8 @@ public class BateauGraphique {
     }
 
     public boolean contient(double mouseX, double mouseY) {
-        double largeur = (orientation == Orientation.HORIZONTAL) ? type.getTaille() * GameBoard.TAILLE_CASE : GameBoard.TAILLE_CASE;
-        double hauteur = (orientation == Orientation.VERTICAL) ? type.getTaille() * GameBoard.TAILLE_CASE : GameBoard.TAILLE_CASE;
+        double largeur = (orientation == Orientation.HORIZONTAL) ? type.getTaille() * TAILLE_CASE : TAILLE_CASE;
+        double hauteur = (orientation == Orientation.VERTICAL) ? type.getTaille() * TAILLE_CASE : TAILLE_CASE;
         return mouseX >= x && mouseX <= x + largeur && mouseY >= y && mouseY <= y + hauteur;
     }
 
@@ -69,22 +72,41 @@ public class BateauGraphique {
             estPlace = true;
             bateauLogique = bateauTest;
 
-            this.x = GameBoard.MARGE + (caseX * GameBoard.TAILLE_CASE);
-            this.y = GameBoard.MARGE + (caseY * GameBoard.TAILLE_CASE);
+            this.x = MARGE + (caseX * TAILLE_CASE);
+            this.y = MARGE + (caseY * TAILLE_CASE);
         } else {
             resetToInitialPosition();
         }
     }
 
-    public void dessiner(GraphicsContext gc, BateauGraphique bateauEnCoursDeDrag) {
+    /// Dessine un bateau quand il n'est pas placé
+    /// - Dans le chantier
+    /// - En cours de drag and drop
+    public void dessinerNonPlace(GraphicsContext gc, BateauGraphique bateauEnCoursDeDrag) {
         gc.setLineWidth(1);
         gc.setFill((this == bateauEnCoursDeDrag) ? Color.rgb(100, 100, 100, 0.7) : Color.GRAY);
-        double largeur = (orientation == Orientation.HORIZONTAL) ? type.getTaille() * GameBoard.TAILLE_CASE : GameBoard.TAILLE_CASE;
-        double hauteur = (orientation == Orientation.VERTICAL) ? type.getTaille() * GameBoard.TAILLE_CASE : GameBoard.TAILLE_CASE;
+        double largeur = (orientation == Orientation.HORIZONTAL) ? type.getTaille() * TAILLE_CASE : TAILLE_CASE;
+        double hauteur = (orientation == Orientation.VERTICAL) ? type.getTaille() * TAILLE_CASE : TAILLE_CASE;
         gc.fillRect(x, y, largeur, hauteur);
         gc.strokeRect(x, y, largeur, hauteur);
     }
 
+    /// Dessine un bateau placé sur une grille
+    public static void dessinerPlace(GraphicsContext gc, Bateau b, int grilleOriginX, int grilleOriginY) {
+
+        gc.setFill(Color.DARKGRAY);
+        gc.setStroke(Color.BLACK);
+        gc.setLineWidth(2);
+
+        double xPixel = grilleOriginX + MARGE + (b.getCoordonneeX() * TAILLE_CASE);
+        double yPixel = grilleOriginY + MARGE + (b.getCoordonneeY() * TAILLE_CASE);
+
+        double largeur = (b.getOrientation() == Orientation.HORIZONTAL) ? b.getType().getTaille() * TAILLE_CASE : TAILLE_CASE;
+        double hauteur = (b.getOrientation() == Orientation.VERTICAL) ? b.getType().getTaille() * TAILLE_CASE : TAILLE_CASE;
+
+        gc.fillRect(xPixel, yPixel, largeur, hauteur);
+        gc.strokeRect(xPixel, yPixel, largeur, hauteur);
+    }
 
     private void resetToInitialPosition() {
         this.x = startX;

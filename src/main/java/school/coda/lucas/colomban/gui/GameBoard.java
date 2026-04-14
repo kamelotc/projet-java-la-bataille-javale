@@ -7,9 +7,9 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import school.coda.lucas.colomban.modele.Bateau;
 import school.coda.lucas.colomban.modele.Grille;
-import school.coda.lucas.colomban.modele.Orientation;
 
 import java.util.List;
+
 
 /// Logique de dessin du composant graphique représentant
 /// - la grille océan : vaisseux du joueur et tirs reçus
@@ -70,7 +70,7 @@ public class GameBoard {
         // Bateaux non placés
         for (BateauGraphique bateau : contexte.flotte) {
             if (bateau.nonPlace()) {
-                bateau.dessiner(gc, contexte.bateauEnCoursDeDrag);
+                bateau.dessinerNonPlace(gc, contexte.bateauEnCoursDeDrag);
             }
         }
     }
@@ -90,19 +90,11 @@ public class GameBoard {
 
         dessinerDecorGrille(oceanX, oceanY);
 
-        gc.setFill(Color.DARKGRAY);
-        gc.setStroke(Color.BLACK);
-        gc.setLineWidth(2);
-
-        for (Bateau b : contexte.grilleJoueur.getListeBateaux()) {
-            double xPixel = oceanX + MARGE + (b.getCoordonneeX() * TAILLE_CASE);
-            double yPixel = oceanY + MARGE + (b.getCoordonneeY() * TAILLE_CASE);
-            double largeur = (b.getOrientation() == Orientation.HORIZONTAL) ? b.getType().getTaille() * TAILLE_CASE : TAILLE_CASE;
-            double hauteur = (b.getOrientation() == Orientation.VERTICAL) ? b.getType().getTaille() * TAILLE_CASE : TAILLE_CASE;
-            gc.fillRect(xPixel, yPixel, largeur, hauteur);
-            gc.strokeRect(xPixel, yPixel, largeur, hauteur);
+        for (Bateau bateau : contexte.grilleJoueur.getListeBateaux()) {
+            BateauGraphique.dessinerPlace(gc, bateau, oceanX, oceanY);
         }
     }
+
 
     private void dessinerGrilleRadar(ContexteDessinPlateau contexte) {
         int radarX = DECALAGE_RADAR;
