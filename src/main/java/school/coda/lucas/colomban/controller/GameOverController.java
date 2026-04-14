@@ -22,7 +22,6 @@ public class GameOverController {
     private MediaPlayer lecteurMusiqueFin;
     private javafx.scene.media.AudioClip sonLast;
 
-    @FXML
     public void initialize() {
         URL cheminMusique = getClass().getResource("/school/coda/lucas/colomban/audio/musique_fin.mp3");
         if (cheminMusique != null) {

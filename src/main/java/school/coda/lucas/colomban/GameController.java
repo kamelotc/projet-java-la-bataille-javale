@@ -75,7 +75,7 @@ public class GameController {
         journalDeBord.appendText("Placez vos 5 bateaux sur la grille de gauche.");
 
         lecteur = new LecteurMusiqueJeu();
-        lecteur.startMusic();
+        lecteur.startMusicCombat();
 
         maGrille = new Grille();
 
@@ -357,7 +357,7 @@ public class GameController {
     }
 
     private void afficherEcranFin(String message) {
-        lecteur.stopMusic();
+        lecteur.stopMusicCombat();
 
 
         try {
