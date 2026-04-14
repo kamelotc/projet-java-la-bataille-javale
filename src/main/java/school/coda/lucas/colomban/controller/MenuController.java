@@ -5,41 +5,26 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.media.Media;
-import javafx.scene.media.MediaPlayer;
 import javafx.stage.Stage;
 import school.coda.lucas.colomban.GameController;
+import school.coda.lucas.colomban.LecteurAudio;
 import school.coda.lucas.colomban.Main;
 
 import java.io.IOException;
-import java.net.URL;
 
 public class MenuController {
 
-    private static MediaPlayer lecteurMusique;
+    private LecteurAudio lecteurAudio;
 
     public void initialize() {
-        if (lecteurMusique == null) {
-            URL cheminMusique = getClass().getResource("/school/coda/lucas/colomban/audio/elden_ring.mp3");
+        lecteurAudio = new LecteurAudio();
+        lecteurAudio.startMusicMenu();
 
-            if (cheminMusique != null) {
-                Media media = new Media(cheminMusique.toExternalForm());
-                lecteurMusique = new MediaPlayer(media);
-
-                lecteurMusique.setCycleCount(MediaPlayer.INDEFINITE);
-                lecteurMusique.play();
-            } else {
-                System.err.println("Fichier audio introuvable ! Vérifie qu'il est bien dans le dossier resources.");
-            }
-        }
     }
 
     @FXML
     protected void onJouerButtonClick(ActionEvent event) {
-        if (lecteurMusique != null) {
-            lecteurMusique.stop();
-            lecteurMusique = null;
-        }
+        lecteurAudio.stopAllAudio();
         Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
         GameController monJeu = new GameController(stage);
         Scene scene = monJeu.getScene();

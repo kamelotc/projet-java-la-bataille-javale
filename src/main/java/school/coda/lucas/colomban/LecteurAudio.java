@@ -11,6 +11,7 @@ public class LecteurAudio {
 
     private MediaPlayer musiqueCombat;
     private MediaPlayer musiqueFin;
+    private MediaPlayer musiqueMenu;
     private AudioClip sonTouche;
     private AudioClip sonCoule;
     private AudioClip sonRate;
@@ -23,6 +24,16 @@ public class LecteurAudio {
             });
         }
         musiqueFin.play();
+    }
+
+    public void startMusicMenu() {
+        if (musiqueMenu == null) {
+            loadMusique("elden_ring.mp3").ifPresent(media -> {
+                musiqueMenu = new MediaPlayer(media);
+                musiqueMenu.setCycleCount(MediaPlayer.INDEFINITE);
+            });
+        }
+        musiqueMenu.play();
     }
 
     public void startMusicCombat() {
@@ -135,5 +146,4 @@ public class LecteurAudio {
         URL resource = LecteurAudio.class.getResource("/school/coda/lucas/colomban/audio/" + audioFileName);
         return Optional.ofNullable(resource);
     }
-
 }
