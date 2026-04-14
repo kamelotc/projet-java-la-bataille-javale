@@ -8,10 +8,14 @@ public class SystemeDeTir {
 
     private static final int TAILLE_GRILLE = 10;
     private static final int TAILLE_CASE = 30;
-    /** Marge de la taille d'une case pour y mettre nos lettres et chiffres */
+    /**
+     * Marge de la taille d'une case pour y mettre nos lettres et chiffres
+     */
     private static final int MARGE = 50;
-    /** Position horizontale de la 2ème grille à droite */
-    private static final int DECALAGE_RADAR = 400;
+    /**
+     * Position horizontale de la 2ème grille à droite
+     */
+    protected static final int DECALAGE_RADAR = 350;
 
     private final GraphicsContext gc;
 
@@ -21,7 +25,7 @@ public class SystemeDeTir {
 
     public void dessinerTousLesTirs(Grille grilleJoueur, Grille grilleOrdi) {
         dessinerTirsGrille(grilleJoueur, MARGE);          // À gauche
-        dessinerTirsGrille(grilleOrdi, DECALAGE_RADAR);   // À droite
+        dessinerTirsGrille(grilleOrdi, DECALAGE_RADAR + MARGE);   // À droite
     }
 
     private void dessinerTirsGrille(Grille grille, int decalageX) {

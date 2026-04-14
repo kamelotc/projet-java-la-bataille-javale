@@ -43,7 +43,8 @@ public class GameController {
     /**
      * Position horizontale de la 2ème grille à droite
      */
-    private static final int DECALAGE_RADAR = 400;
+    protected static final int DECALAGE_RADAR = 350;
+    private static final int DECALAGE_RADAR_AVEC_MARGE = MARGE + DECALAGE_RADAR;
     private static final int LARGEUR_CANVAS = 800;
     private static final int HAUTEUR_CANVAS = 600;
     private static final int COMPUTER_DELAY_MS = 100;
@@ -154,6 +155,7 @@ public class GameController {
             onCombatGrilleRadarClick(event.getX(), event.getY());
         });
     }
+
     /// - Déclenche le tir sur l'ordinateur.
     /// - Si fin de partie -> redirection sur l'écran Game over
     /// - Contre-attaque de l'ordinateur si la partie n'est pas terminée
@@ -252,13 +254,13 @@ public class GameController {
 
     private boolean tirDuJoueur(double mx, double my) {
 
-        boolean horsGrille = !(mx >= DECALAGE_RADAR) || !(mx < DECALAGE_RADAR + (TAILLE_GRILLE * TAILLE_CASE)) || !(my >= MARGE) || !(my < MARGE + (TAILLE_GRILLE * TAILLE_CASE));
+        boolean horsGrille = !(mx >= MARGE + DECALAGE_RADAR) || !(mx < MARGE + DECALAGE_RADAR + (TAILLE_GRILLE * TAILLE_CASE)) || !(my >= MARGE) || !(my < MARGE + (TAILLE_GRILLE * TAILLE_CASE));
 
         if (horsGrille) {
             return false;
         }
 
-        int caseX = (int) ((mx - DECALAGE_RADAR) / TAILLE_CASE);
+        int caseX = (int) ((mx - (MARGE + DECALAGE_RADAR)) / TAILLE_CASE);
         int caseY = (int) ((my - MARGE) / TAILLE_CASE);
 
         if (ordi.isDejaCible(caseY, caseX)) {
@@ -318,21 +320,22 @@ public class GameController {
     private void rafraichirEcran() {
         gc.clearRect(0, 0, LARGEUR_CANVAS, HAUTEUR_CANVAS);
 
-        dessinerDecor();
+        dessinerGrilleOcean();
+        dessinerGrilleRadar();
+        dessinerChantierNaval();
 
-        gc.setFill(Color.DARKGRAY);
-        gc.setStroke(Color.BLACK);
-        gc.setLineWidth(2);
+        monSystemeDeTir.dessinerTousLesTirs(maGrille, ordi.getSaGrille());
+    }
 
-        for (Bateau b : maGrille.getListeBateaux()) {
-            double xPixel = MARGE + (b.getCoordonneeX() * TAILLE_CASE);
-            double yPixel = MARGE + (b.getCoordonneeY() * TAILLE_CASE);
-            double largeur = (b.getOrientation() == Orientation.HORIZONTAL) ? b.getType().getTaille() * TAILLE_CASE : TAILLE_CASE;
-            double hauteur = (b.getOrientation() == Orientation.VERTICAL) ? b.getType().getTaille() * TAILLE_CASE : TAILLE_CASE;
-            gc.fillRect(xPixel, yPixel, largeur, hauteur);
-            gc.strokeRect(xPixel, yPixel, largeur, hauteur);
+    private void dessinerChantierNaval() {
+        gc.setFont(Font.font("Courier New", FontWeight.BOLD, 14));
+
+        if (enPhaseDePlacement) {
+            gc.setFill(Color.WHITE);
+            gc.fillText("Chantier naval (Clic droit pour tourner): ", 50, 400);
         }
 
+        // Bateaux non placés
         gc.setLineWidth(1);
         for (BateauGraphique b : flotte) {
             if (!b.estPlace) {
@@ -343,51 +346,85 @@ public class GameController {
                 gc.strokeRect(b.x, b.y, largeur, hauteur);
             }
         }
-
-        monSystemeDeTir.dessinerTousLesTirs(maGrille, ordi.getSaGrille());
     }
 
-    private void dessinerDecor() {
-        gc.setFill(Color.rgb(10, 27, 42, 0.7));
-        gc.fillRect(MARGE, MARGE, TAILLE_GRILLE * TAILLE_CASE, TAILLE_GRILLE * TAILLE_CASE);
-        gc.fillRect(DECALAGE_RADAR, MARGE, TAILLE_GRILLE * TAILLE_CASE, TAILLE_GRILLE * TAILLE_CASE);
-        gc.setFont(Font.font("Courier New", FontWeight.BOLD, 14));
+    private void dessinerGrilleOcean() {
+        int oceanX = 0;
+        int oceanY = 0;
 
+        gc.setFont(Font.font("Courier New", FontWeight.BOLD, 14));
         if (enPhaseDePlacement) {
             gc.setFill(Color.CYAN);
-            gc.fillText("VOTRE FLOTTE (Placez vos bateaux)", MARGE, MARGE - 20);
-            gc.setFill(Color.GRAY);
-            gc.fillText("RADAR (Désactivé)", DECALAGE_RADAR, MARGE - 20);
-
-            gc.setFill(Color.WHITE);
-            gc.fillText("Chantier naval (Clic droit pour tourner): ", 50, 400);
+            gc.fillText("VOTRE FLOTTE (Placez vos bateaux)", oceanX + MARGE, oceanY + MARGE - 20);
         } else {
             gc.setFill(Color.CYAN);
-            gc.fillText("VOTRE FLOTTE (Défense)", MARGE, MARGE - 20);
-            gc.setFill(Color.ORANGE);
-            gc.fillText("RADAR (Cliquez ici pour attaquer !)", DECALAGE_RADAR, MARGE - 20);
+            gc.fillText("VOTRE FLOTTE (Défense)", oceanX + MARGE, oceanY + MARGE - 20);
         }
+
+        dessinerDecorGrille(oceanX, oceanY);
+
+        gc.setFill(Color.DARKGRAY);
+        gc.setStroke(Color.BLACK);
+        gc.setLineWidth(2);
+
+        for (Bateau b : maGrille.getListeBateaux()) {
+            double xPixel = oceanX + MARGE + (b.getCoordonneeX() * TAILLE_CASE);
+            double yPixel = oceanY + MARGE + (b.getCoordonneeY() * TAILLE_CASE);
+            double largeur = (b.getOrientation() == Orientation.HORIZONTAL) ? b.getType().getTaille() * TAILLE_CASE : TAILLE_CASE;
+            double hauteur = (b.getOrientation() == Orientation.VERTICAL) ? b.getType().getTaille() * TAILLE_CASE : TAILLE_CASE;
+            gc.fillRect(xPixel, yPixel, largeur, hauteur);
+            gc.strokeRect(xPixel, yPixel, largeur, hauteur);
+        }
+    }
+
+    private void dessinerGrilleRadar() {
+        int radarX = DECALAGE_RADAR;
+        int radarY = 0;
+
+        gc.setFont(Font.font("Courier New", FontWeight.BOLD, 14));
+        // Infos grille radar
+        if (enPhaseDePlacement) {
+            gc.setFill(Color.GRAY);
+            gc.fillText("RADAR (Désactivé)", radarX + MARGE, radarY + MARGE - 20);
+        } else {
+            gc.setFill(Color.ORANGE);
+            gc.fillText("RADAR (Cliquez ici pour attaquer !)", radarX + MARGE, radarY + MARGE - 20);
+        }
+
+        dessinerDecorGrille(radarX, radarY);
+    }
+
+    private void dessinerDecorGrille(int originX, int originY) {
+
+        int width = TAILLE_GRILLE * TAILLE_CASE;
+        int height = TAILLE_GRILLE * TAILLE_CASE;
+
+        int x = originX + MARGE;
+        int y = originY + MARGE;
+
+        gc.setFill(Color.rgb(10, 27, 42, 0.7));
+        gc.fillRect(x, y, width, height);
 
         gc.setFill(Color.WHITE);
 
         for (int i = 0; i <= TAILLE_GRILLE; i++) {
-            double posG1 = MARGE + (i * TAILLE_CASE);
-            double posG2 = DECALAGE_RADAR + (i * TAILLE_CASE);
+
+            int colX = i * TAILLE_CASE;
+            int rowY = i * TAILLE_CASE;
 
             gc.setStroke(Color.web("#00ffcc"));
             gc.setLineWidth(1.0);
 
-            gc.strokeLine(posG1, MARGE, posG1, MARGE + (TAILLE_GRILLE * TAILLE_CASE));
-            gc.strokeLine(MARGE, posG1, MARGE + (TAILLE_GRILLE * TAILLE_CASE), posG1);
-            gc.strokeLine(posG2, MARGE, posG2, MARGE + (TAILLE_GRILLE * TAILLE_CASE));
-            gc.strokeLine(DECALAGE_RADAR, posG1, DECALAGE_RADAR + (TAILLE_GRILLE * TAILLE_CASE), posG1);
+            // Ligne verticale
+            gc.strokeLine(x + colX, y, x + colX, y + height);
+            // Ligne horizontale
+            gc.strokeLine(x, y + rowY, x + width, y + rowY);
 
             if (i < TAILLE_GRILLE) {
-                gc.fillText(String.valueOf(i + 1), posG1 + 10, MARGE - 10);
-                gc.fillText(String.valueOf((char) ('A' + i)), MARGE - 20, posG1 + 20);
-
-                gc.fillText(String.valueOf(i + 1), posG2 + 10, MARGE - 10);
-                gc.fillText(String.valueOf((char) ('A' + i)), DECALAGE_RADAR - 20, posG1 + 20);
+                // Numéros de cases (horizontal)
+                gc.fillText(String.valueOf(i + 1), x + colX + 10, y - 10);
+                // Lettres de cases (vertical)
+                gc.fillText(String.valueOf((char) ('A' + i)), x + -20, y + rowY + 20);
             }
         }
     }
