@@ -6,8 +6,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import school.coda.lucas.colomban.GameController;
-import school.coda.lucas.colomban.LecteurAudio;
+import school.coda.lucas.colomban.gui.LecteurAudio;
 import school.coda.lucas.colomban.Main;
 
 import java.io.IOException;

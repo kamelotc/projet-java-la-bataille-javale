@@ -1,14 +1,31 @@
-package school.coda.lucas.colomban;
+package school.coda.lucas.colomban.gui;
 
 import school.coda.lucas.colomban.modele.Bateau;
 import school.coda.lucas.colomban.modele.Grille;
 import school.coda.lucas.colomban.modele.Orientation;
 import school.coda.lucas.colomban.modele.TypeBateau;
 
-class BateauGraphique {
+public class BateauGraphique {
     TypeBateau type;
     Orientation orientation = Orientation.HORIZONTAL;
-    double x, y, startX, startY;
+
+    public double x() {
+        return x;
+    }
+
+    public double y() {
+        return y;
+    }
+
+    double x;
+    double y;
+    double startX;
+    double startY;
+
+    public boolean estPlace() {
+        return estPlace;
+    }
+
     boolean estPlace = false;
 
     Bateau bateauLogique = null;
@@ -21,8 +38,8 @@ class BateauGraphique {
     }
 
     public boolean contient(double mouseX, double mouseY) {
-        double largeur = (orientation == Orientation.HORIZONTAL) ? type.getTaille() * GameController.TAILLE_CASE : GameController.TAILLE_CASE;
-        double hauteur = (orientation == Orientation.VERTICAL) ? type.getTaille() * GameController.TAILLE_CASE : GameController.TAILLE_CASE;
+        double largeur = (orientation == Orientation.HORIZONTAL) ? type.getTaille() * CanvasGameBoard.TAILLE_CASE : CanvasGameBoard.TAILLE_CASE;
+        double hauteur = (orientation == Orientation.VERTICAL) ? type.getTaille() * CanvasGameBoard.TAILLE_CASE : CanvasGameBoard.TAILLE_CASE;
         return mouseX >= x && mouseX <= x + largeur && mouseY >= y && mouseY <= y + hauteur;
     }
 
@@ -56,21 +73,21 @@ class BateauGraphique {
     }
 
     public void placerSur(Grille grille) {
-        int caseX = (int) ((x + (GameController.TAILLE_CASE / 2.0) - GameController.MARGE) / GameController.TAILLE_CASE);
-        int caseY = (int) ((y + (GameController.TAILLE_CASE / 2.0) - GameController.MARGE) / GameController.TAILLE_CASE);
-
+        int caseX = CanvasGameBoard.oceanXCellFromPixel(x);
+        int caseY = CanvasGameBoard.oceanYCellFromPixel(y);
         Bateau bateauTest = new Bateau(type, orientation, caseX, caseY);
 
         if (grille.placerBateau(bateauTest)) {
             estPlace = true;
             bateauLogique = bateauTest;
 
-            this.x = GameController.MARGE + (caseX * GameController.TAILLE_CASE);
-            this.y = GameController.MARGE + (caseY * GameController.TAILLE_CASE);
+            this.x = CanvasGameBoard.MARGE + (caseX * CanvasGameBoard.TAILLE_CASE);
+            this.y = CanvasGameBoard.MARGE + (caseY * CanvasGameBoard.TAILLE_CASE);
         } else {
             resetToInitialPosition();
         }
     }
+
 
     private void resetToInitialPosition() {
         this.x = startX;

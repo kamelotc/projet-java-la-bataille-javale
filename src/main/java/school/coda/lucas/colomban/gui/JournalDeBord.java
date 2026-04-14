@@ -1,8 +1,8 @@
-package school.coda.lucas.colomban;
+package school.coda.lucas.colomban.gui;
 
 import javafx.scene.control.TextArea;
 
-class JournalDeBord {
+public class JournalDeBord {
 
     private final TextArea textArea;
 

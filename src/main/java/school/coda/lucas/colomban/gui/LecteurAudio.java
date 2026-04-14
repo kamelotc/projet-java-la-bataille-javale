@@ -1,4 +1,4 @@
-package school.coda.lucas.colomban;
+package school.coda.lucas.colomban.gui;
 
 import javafx.scene.media.AudioClip;
 import javafx.scene.media.Media;

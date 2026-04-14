@@ -1,4 +1,4 @@
-package school.coda.lucas.colomban;
+package school.coda.lucas.colomban.controller;
 
 import javafx.animation.PauseTransition;
 import javafx.fxml.FXMLLoader;
@@ -14,7 +14,11 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import school.coda.lucas.colomban.controller.GameOverController;
+import school.coda.lucas.colomban.Main;
+import school.coda.lucas.colomban.gui.BateauGraphique;
+import school.coda.lucas.colomban.gui.CanvasGameBoard;
+import school.coda.lucas.colomban.gui.JournalDeBord;
+import school.coda.lucas.colomban.gui.LecteurAudio;
 import school.coda.lucas.colomban.modele.Grille;
 import school.coda.lucas.colomban.modele.JoueurOrdi;
 import school.coda.lucas.colomban.modele.TypeBateau;
@@ -78,6 +82,7 @@ public class GameController {
 
         Canvas canvas = canvasGameBoard.getCanvas();
         setupCanvasEventHandlers(canvas);
+
         rafraichirEcran();
 
         Button btnCombattre = createBoutonCombattre();
@@ -179,7 +184,7 @@ public class GameController {
         btnCombattre.setOnAction(_ -> {
             boolean tousPlaces = true;
             for (BateauGraphique b : flotte) {
-                if (!b.estPlace) {
+                if (!b.estPlace()) {
                     tousPlaces = false;
                     break;
                 }
@@ -206,8 +211,8 @@ public class GameController {
         findBateauEn(mx, my).ifPresent(bateau -> {
             bateau.retirerSiPlaceSur(maGrille);
             bateauEnCoursDeDrag = bateau;
-            dragOffsetX = mx - bateau.x;
-            dragOffsetY = my - bateau.y;
+            dragOffsetX = mx - bateau.x();
+            dragOffsetY = my - bateau.y();
             rafraichirEcran();
         });
     }
@@ -237,8 +242,8 @@ public class GameController {
             return false;
         }
 
-        int caseX = CanvasGameBoard.getCaseX(mx);
-        int caseY = CanvasGameBoard.getCaseY(my);
+        int caseX = CanvasGameBoard.radarXCellFromPixel(mx);
+        int caseY = CanvasGameBoard.radarYCellFromPixel(my);
 
         if (ordi.isDejaCible(caseY, caseX)) {
             journalDeBord.appendText("ATTENTION : Case " + (char) ('A' + caseY) + "-" + (caseX + 1) + " déjà ciblée ! Tir annulé.");

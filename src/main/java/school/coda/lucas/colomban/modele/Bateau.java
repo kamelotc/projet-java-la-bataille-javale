@@ -1,23 +1,33 @@
 package school.coda.lucas.colomban.modele;
 
 public class Bateau {
-    private TypeBateau type;
-    private Orientation orientation;
-    private int coordonneeX;
-    private int coordonneeY;
+    private final TypeBateau type;
+    private final Orientation orientation;
+    /**
+     * Index de cellule verticalement.
+     * Commence à 0
+     */
+    private final int coordonneeX;
+    /**
+     * Index de cellule horizontalement.
+     * Commence à 0
+     */
+    private final int coordonneeY;
     private int casesTouchees;
 
-    public Bateau(TypeBateau type, Orientation orientation,int coordonneeX, int coordonneeY){
+    public Bateau(TypeBateau type, Orientation orientation, int coordonneeX, int coordonneeY) {
         this.type = type;
         this.orientation = orientation;
         this.coordonneeX = coordonneeX;
         this.coordonneeY = coordonneeY;
         this.casesTouchees = 0;
     }
-    public void toucher(){
+
+    public void toucher() {
         this.casesTouchees++;
     }
-    public boolean estCouler(){
+
+    public boolean estCouler() {
         return casesTouchees >= type.getTaille();
     }
 

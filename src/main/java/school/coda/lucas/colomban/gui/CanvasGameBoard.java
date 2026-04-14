@@ -1,4 +1,4 @@
-package school.coda.lucas.colomban;
+package school.coda.lucas.colomban.gui;
 
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -14,11 +14,11 @@ import java.util.List;
 public class CanvasGameBoard {
 
     private static final int TAILLE_GRILLE = 10;
-    private static final int TAILLE_CASE = 30;
+    public static final int TAILLE_CASE = 30;
     /**
      * Marge de la taille d'une case pour y mettre nos lettres et chiffres
      */
-    private static final int MARGE = 50;
+    public static final int MARGE = 50;
     /**
      * Position horizontale de la 2ème grille à droite
      */
@@ -47,13 +47,22 @@ public class CanvasGameBoard {
         return !(mx >= MARGE + DECALAGE_RADAR) || !(mx < MARGE + DECALAGE_RADAR + (TAILLE_GRILLE * TAILLE_CASE)) || !(my >= MARGE) || !(my < MARGE + (TAILLE_GRILLE * TAILLE_CASE));
     }
 
-    public static int getCaseY(double my) {
-        return (int) ((my - MARGE) / TAILLE_CASE);
+    public static int radarYCellFromPixel(double y) {
+        return (int) ((y - MARGE) / TAILLE_CASE);
     }
 
-    public static int getCaseX(double mx) {
-        return (int) ((mx - (MARGE + DECALAGE_RADAR)) / TAILLE_CASE);
+    public static int radarXCellFromPixel(double x) {
+        return (int) ((x - (MARGE + DECALAGE_RADAR)) / TAILLE_CASE);
     }
+
+    public static int oceanXCellFromPixel(double x) {
+        return (int) ((x + (TAILLE_CASE / 2.0) - MARGE) / TAILLE_CASE);
+    }
+
+    public static int oceanYCellFromPixel(double y) {
+        return (int) ((y + (TAILLE_CASE / 2.0) - MARGE) / TAILLE_CASE);
+    }
+
     /// Redessine la zone de jeu
     /// - Grille océan : flotte du joueur et tirs reçus
     /// - Grille radar : tirs envoyés
