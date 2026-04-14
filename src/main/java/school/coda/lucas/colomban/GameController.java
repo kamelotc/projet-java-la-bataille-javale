@@ -7,22 +7,16 @@ import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import school.coda.lucas.colomban.controller.GameOverController;
-import school.coda.lucas.colomban.modele.Bateau;
 import school.coda.lucas.colomban.modele.Grille;
 import school.coda.lucas.colomban.modele.JoueurOrdi;
-import school.coda.lucas.colomban.modele.Orientation;
 import school.coda.lucas.colomban.modele.TypeBateau;
 import school.coda.lucas.colomban.succes.GestionnaireSucces;
 
@@ -32,48 +26,33 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+
 public class GameController {
 
-    private static final int TAILLE_GRILLE = 10;
-    public static final int TAILLE_CASE = 30;
-    /**
-     * Marge de la taille d'une case pour y mettre nos lettres et chiffres
-     */
-    public static final int MARGE = 50;
-    /**
-     * Position horizontale de la 2ème grille à droite
-     */
-    protected static final int DECALAGE_RADAR = 350;
-    private static final int DECALAGE_RADAR_AVEC_MARGE = MARGE + DECALAGE_RADAR;
-    private static final int LARGEUR_CANVAS = 800;
-    private static final int HAUTEUR_CANVAS = 600;
-    private static final int COMPUTER_DELAY_MS = 100;
+    private final static int COMPUTER_DELAY_MS = 100;
 
     private final Stage stage;
-    private final Canvas canvas;
-    private final GraphicsContext gc;
     private final GestionnaireSucces gestionnaireSucces;
     private final Scene scene;
     private final JournalDeBord journalDeBord;
     private final Grille maGrille;
     private final LecteurAudio lecteur;
     private final JoueurOrdi ordi;
-    private final SystemeDeTir monSystemeDeTir;
     private final List<BateauGraphique> flotte;
+    private final CanvasGameBoard canvasGameBoard;
 
+    private boolean enPhaseDePlacement = true;
     private int numeroTour = 1;
+    private boolean tourDuJoueur = true;
     private BateauGraphique bateauEnCoursDeDrag = null;
     private double dragOffsetX = 0;
     private double dragOffsetY = 0;
-    private boolean enPhaseDePlacement = true;
-    private boolean tourDuJoueur = true;
 
     public GameController(Stage stage) {
         this.stage = stage;
-        canvas = new Canvas(LARGEUR_CANVAS, HAUTEUR_CANVAS);
-        gc = canvas.getGraphicsContext2D();
 
-        journalDeBord = new JournalDeBord(LARGEUR_CANVAS);
+        canvasGameBoard = new CanvasGameBoard();
+        journalDeBord = new JournalDeBord(CanvasGameBoard.LARGEUR_CANVAS);
         journalDeBord.appendText("Placez vos 5 bateaux sur la grille de gauche.");
 
         lecteur = new LecteurAudio();
@@ -90,7 +69,6 @@ public class GameController {
         flotte.add(new BateauGraphique(TypeBateau.SOUS_MARIN, 200, 470));
         flotte.add(new BateauGraphique(TypeBateau.PATROUILLEUR, 200, 520));
 
-        monSystemeDeTir = new SystemeDeTir(gc);
 
         this.scene = createScene();
         gestionnaireSucces = new GestionnaireSucces("Joueur");
@@ -98,8 +76,8 @@ public class GameController {
 
     private Scene createScene() {
 
-        setupCanvasEventHandlers();
-
+        Canvas canvas = canvasGameBoard.getCanvas();
+        setupCanvasEventHandlers(canvas);
         rafraichirEcran();
 
         Button btnCombattre = createBoutonCombattre();
@@ -114,7 +92,7 @@ public class GameController {
         BorderPane root = new BorderPane(conteneur);
         root.setPadding(new Insets(10));
 
-        Scene scene = new Scene(root, LARGEUR_CANVAS + 20, HAUTEUR_CANVAS + 160);
+        Scene scene = new Scene(root, CanvasGameBoard.LARGEUR_CANVAS + 20, CanvasGameBoard.HAUTEUR_CANVAS + 160);
         URL cssUrl = getClass().getResource("/school/coda/lucas/colomban/style.css");
         if (cssUrl != null) {
             scene.getStylesheets().add(cssUrl.toExternalForm());
@@ -124,13 +102,14 @@ public class GameController {
         return scene;
     }
 
-    private void setupCanvasEventHandlers() {
-        canvas.setOnMousePressed(event1 -> {
-            if (!enPhaseDePlacement) return;
-            double mx = event1.getX();
-            double my = event1.getY();
 
-            switch (event1.getButton()) {
+    private void setupCanvasEventHandlers(Canvas canvas) {
+        canvas.setOnMousePressed(event -> {
+            if (!enPhaseDePlacement) return;
+            double mx = event.getX();
+            double my = event.getY();
+
+            switch (event.getButton()) {
                 case SECONDARY -> orienterBateau(mx, my);
                 case PRIMARY -> retirerBateau(mx, my);
             }
@@ -254,14 +233,12 @@ public class GameController {
 
     private boolean tirDuJoueur(double mx, double my) {
 
-        boolean horsGrille = !(mx >= MARGE + DECALAGE_RADAR) || !(mx < MARGE + DECALAGE_RADAR + (TAILLE_GRILLE * TAILLE_CASE)) || !(my >= MARGE) || !(my < MARGE + (TAILLE_GRILLE * TAILLE_CASE));
-
-        if (horsGrille) {
+        if (CanvasGameBoard.estHorsGrille(mx, my)) {
             return false;
         }
 
-        int caseX = (int) ((mx - (MARGE + DECALAGE_RADAR)) / TAILLE_CASE);
-        int caseY = (int) ((my - MARGE) / TAILLE_CASE);
+        int caseX = CanvasGameBoard.getCaseX(mx);
+        int caseY = CanvasGameBoard.getCaseY(my);
 
         if (ordi.isDejaCible(caseY, caseX)) {
             journalDeBord.appendText("ATTENTION : Case " + (char) ('A' + caseY) + "-" + (caseX + 1) + " déjà ciblée ! Tir annulé.");
@@ -280,6 +257,7 @@ public class GameController {
         rafraichirEcran();
         return true;
     }
+
 
     private void tirDeLOrdi() {
         ordi.jouerTour(maGrille);
@@ -314,119 +292,10 @@ public class GameController {
         }
     }
 
-    /// Redessine la zone de jeu
-    /// - Grille océan : flotte du joueur et tirs reçus
-    /// - Grille radar : tirs envoyés
     private void rafraichirEcran() {
-        gc.clearRect(0, 0, LARGEUR_CANVAS, HAUTEUR_CANVAS);
-
-        dessinerGrilleOcean();
-        dessinerGrilleRadar();
-        dessinerChantierNaval();
-
-        monSystemeDeTir.dessinerTousLesTirs(maGrille, ordi.getSaGrille());
-    }
-
-    private void dessinerChantierNaval() {
-        gc.setFont(Font.font("Courier New", FontWeight.BOLD, 14));
-
-        if (enPhaseDePlacement) {
-            gc.setFill(Color.WHITE);
-            gc.fillText("Chantier naval (Clic droit pour tourner): ", 50, 400);
-        }
-
-        // Bateaux non placés
-        gc.setLineWidth(1);
-        for (BateauGraphique b : flotte) {
-            if (!b.estPlace) {
-                gc.setFill((b == bateauEnCoursDeDrag) ? Color.rgb(100, 100, 100, 0.7) : Color.GRAY);
-                double largeur = (b.orientation == Orientation.HORIZONTAL) ? b.type.getTaille() * TAILLE_CASE : TAILLE_CASE;
-                double hauteur = (b.orientation == Orientation.VERTICAL) ? b.type.getTaille() * TAILLE_CASE : TAILLE_CASE;
-                gc.fillRect(b.x, b.y, largeur, hauteur);
-                gc.strokeRect(b.x, b.y, largeur, hauteur);
-            }
-        }
-    }
-
-    private void dessinerGrilleOcean() {
-        int oceanX = 0;
-        int oceanY = 0;
-
-        gc.setFont(Font.font("Courier New", FontWeight.BOLD, 14));
-        if (enPhaseDePlacement) {
-            gc.setFill(Color.CYAN);
-            gc.fillText("VOTRE FLOTTE (Placez vos bateaux)", oceanX + MARGE, oceanY + MARGE - 20);
-        } else {
-            gc.setFill(Color.CYAN);
-            gc.fillText("VOTRE FLOTTE (Défense)", oceanX + MARGE, oceanY + MARGE - 20);
-        }
-
-        dessinerDecorGrille(oceanX, oceanY);
-
-        gc.setFill(Color.DARKGRAY);
-        gc.setStroke(Color.BLACK);
-        gc.setLineWidth(2);
-
-        for (Bateau b : maGrille.getListeBateaux()) {
-            double xPixel = oceanX + MARGE + (b.getCoordonneeX() * TAILLE_CASE);
-            double yPixel = oceanY + MARGE + (b.getCoordonneeY() * TAILLE_CASE);
-            double largeur = (b.getOrientation() == Orientation.HORIZONTAL) ? b.getType().getTaille() * TAILLE_CASE : TAILLE_CASE;
-            double hauteur = (b.getOrientation() == Orientation.VERTICAL) ? b.getType().getTaille() * TAILLE_CASE : TAILLE_CASE;
-            gc.fillRect(xPixel, yPixel, largeur, hauteur);
-            gc.strokeRect(xPixel, yPixel, largeur, hauteur);
-        }
-    }
-
-    private void dessinerGrilleRadar() {
-        int radarX = DECALAGE_RADAR;
-        int radarY = 0;
-
-        gc.setFont(Font.font("Courier New", FontWeight.BOLD, 14));
-        // Infos grille radar
-        if (enPhaseDePlacement) {
-            gc.setFill(Color.GRAY);
-            gc.fillText("RADAR (Désactivé)", radarX + MARGE, radarY + MARGE - 20);
-        } else {
-            gc.setFill(Color.ORANGE);
-            gc.fillText("RADAR (Cliquez ici pour attaquer !)", radarX + MARGE, radarY + MARGE - 20);
-        }
-
-        dessinerDecorGrille(radarX, radarY);
-    }
-
-    private void dessinerDecorGrille(int originX, int originY) {
-
-        int width = TAILLE_GRILLE * TAILLE_CASE;
-        int height = TAILLE_GRILLE * TAILLE_CASE;
-
-        int x = originX + MARGE;
-        int y = originY + MARGE;
-
-        gc.setFill(Color.rgb(10, 27, 42, 0.7));
-        gc.fillRect(x, y, width, height);
-
-        gc.setFill(Color.WHITE);
-
-        for (int i = 0; i <= TAILLE_GRILLE; i++) {
-
-            int colX = i * TAILLE_CASE;
-            int rowY = i * TAILLE_CASE;
-
-            gc.setStroke(Color.web("#00ffcc"));
-            gc.setLineWidth(1.0);
-
-            // Ligne verticale
-            gc.strokeLine(x + colX, y, x + colX, y + height);
-            // Ligne horizontale
-            gc.strokeLine(x, y + rowY, x + width, y + rowY);
-
-            if (i < TAILLE_GRILLE) {
-                // Numéros de cases (horizontal)
-                gc.fillText(String.valueOf(i + 1), x + colX + 10, y - 10);
-                // Lettres de cases (vertical)
-                gc.fillText(String.valueOf((char) ('A' + i)), x + -20, y + rowY + 20);
-            }
-        }
+        canvasGameBoard.rafraichirEcran(new CanvasGameBoard.ContexteDessinPlateau(
+                maGrille, ordi.getSaGrille(), enPhaseDePlacement, flotte, bateauEnCoursDeDrag
+        ));
     }
 
     private void afficherEcranFin(String message) {
