@@ -54,7 +54,7 @@ public class GameController {
     private final Scene scene;
     private final JournalDeBord journalDeBord;
     private final Grille maGrille;
-    private final LecteurMusiqueJeu lecteur;
+    private final LecteurAudio lecteur;
     private final JoueurOrdi ordi;
     private final SystemeDeTir monSystemeDeTir;
     private final List<BateauGraphique> flotte;
@@ -74,7 +74,7 @@ public class GameController {
         journalDeBord = new JournalDeBord(LARGEUR_CANVAS);
         journalDeBord.appendText("Placez vos 5 bateaux sur la grille de gauche.");
 
-        lecteur = new LecteurMusiqueJeu();
+        lecteur = new LecteurAudio();
         lecteur.startMusicCombat();
 
         maGrille = new Grille();

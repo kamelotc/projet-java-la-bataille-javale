@@ -7,12 +7,23 @@ import javafx.scene.media.MediaPlayer;
 import java.net.URL;
 import java.util.Optional;
 
-class LecteurMusiqueJeu {
+public class LecteurAudio {
 
     private MediaPlayer musiqueCombat;
+    private MediaPlayer musiqueFin;
     private AudioClip sonTouche;
     private AudioClip sonCoule;
     private AudioClip sonRate;
+    private AudioClip sonGagne;
+
+    public void startMusicFin() {
+        if (musiqueFin == null) {
+            loadMusique("musique_fin.mp3").ifPresent(media -> {
+                musiqueFin = new MediaPlayer(media);
+            });
+        }
+        musiqueFin.play();
+    }
 
     public void startMusicCombat() {
         if (musiqueCombat == null) {
@@ -25,11 +36,27 @@ class LecteurMusiqueJeu {
         musiqueCombat.play();
     }
 
-    public void stopMusicCombat() {
-        if (musiqueCombat != null) {
-            musiqueCombat.stop();
+    public void stopAllAudio() {
+        stopMusique(musiqueFin);
+        stopMusique(musiqueCombat);
+        stopSon(sonRate);
+        stopSon(sonCoule);
+        stopSon(sonTouche);
+        stopSon(sonGagne);
+    }
+
+    private void stopSon(AudioClip son) {
+        if (son != null && son.isPlaying()) {
+            son.stop();
         }
     }
+
+    private void stopMusique(MediaPlayer musique) {
+        if (musique != null) {
+            musique.stop();
+        }
+    }
+
 
     public void playSoundForAction(String messageTirJoueur, boolean aTouche) {
         if (messageTirJoueur.contains("Touché-Coulé")) {
@@ -39,6 +66,16 @@ class LecteurMusiqueJeu {
         } else {
             playSonRate();
         }
+    }
+
+    public void playSonGagne() {
+        if (sonGagne == null) {
+            loadSound("gagner.mp3").ifPresent(audioClip -> {
+                sonGagne = audioClip;
+                sonGagne.setVolume(1.0);
+            });
+        }
+        playSon(sonGagne);
     }
 
     private void playSonRate() {
@@ -95,7 +132,8 @@ class LecteurMusiqueJeu {
     }
 
     private Optional<URL> getAudioFileUrl(String audioFileName) {
-        URL resource = LecteurMusiqueJeu.class.getResource("/school/coda/lucas/colomban/audio/" + audioFileName);
+        URL resource = LecteurAudio.class.getResource("/school/coda/lucas/colomban/audio/" + audioFileName);
         return Optional.ofNullable(resource);
     }
+
 }
