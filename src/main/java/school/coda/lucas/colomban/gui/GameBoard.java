@@ -46,10 +46,6 @@ public class GameBoard {
         return canvas;
     }
 
-    /// Redessine la zone de jeu
-    /// - Grille océan : flotte du joueur et tirs reçus
-    /// - Grille radar : tirs envoyés
-    ///
     public void rafraichirEcran(ContexteDessinPlateau contexte) {
         gc.clearRect(0, 0, LARGEUR_CANVAS, HAUTEUR_CANVAS);
 
