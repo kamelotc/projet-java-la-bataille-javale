@@ -30,7 +30,6 @@ public class GameBoard {
     public static final int LARGEUR_CANVAS = 800;
     public static final int HAUTEUR_CANVAS = 600;
 
-
     private final Canvas canvas;
 
     private final GraphicsContext gc;
@@ -45,26 +44,6 @@ public class GameBoard {
 
     public Canvas getCanvas() {
         return canvas;
-    }
-
-    public static boolean estHorsGrille(double mx, double my) {
-        return !(mx >= MARGE + DECALAGE_RADAR) || !(mx < MARGE + DECALAGE_RADAR + (TAILLE_GRILLE * TAILLE_CASE)) || !(my >= MARGE) || !(my < MARGE + (TAILLE_GRILLE * TAILLE_CASE));
-    }
-
-    public static int radarYCellFromPixel(double y) {
-        return (int) ((y - MARGE) / TAILLE_CASE);
-    }
-
-    public static int radarXCellFromPixel(double x) {
-        return (int) ((x - (MARGE + DECALAGE_RADAR)) / TAILLE_CASE);
-    }
-
-    public static int oceanXCellFromPixel(double x) {
-        return (int) ((x + (TAILLE_CASE / 2.0) - MARGE) / TAILLE_CASE);
-    }
-
-    public static int oceanYCellFromPixel(double y) {
-        return (int) ((y + (TAILLE_CASE / 2.0) - MARGE) / TAILLE_CASE);
     }
 
     /// Redessine la zone de jeu
@@ -93,14 +72,9 @@ public class GameBoard {
         }
 
         // Bateaux non placés
-        gc.setLineWidth(1);
-        for (BateauGraphique b : contexte.flotte) {
-            if (!b.estPlace) {
-                gc.setFill((b == contexte.bateauEnCoursDeDrag) ? Color.rgb(100, 100, 100, 0.7) : Color.GRAY);
-                double largeur = (b.orientation == Orientation.HORIZONTAL) ? b.type.getTaille() * TAILLE_CASE : TAILLE_CASE;
-                double hauteur = (b.orientation == Orientation.VERTICAL) ? b.type.getTaille() * TAILLE_CASE : TAILLE_CASE;
-                gc.fillRect(b.x, b.y, largeur, hauteur);
-                gc.strokeRect(b.x, b.y, largeur, hauteur);
+        for (BateauGraphique bateau : contexte.flotte) {
+            if (bateau.nonPlace()) {
+                bateau.dessiner(gc, contexte.bateauEnCoursDeDrag);
             }
         }
     }
@@ -184,6 +158,26 @@ public class GameBoard {
                 gc.fillText(String.valueOf((char) ('A' + i)), x + -20, y + rowY + 20);
             }
         }
+    }
+
+    public static boolean estHorsGrille(double mx, double my) {
+        return !(mx >= MARGE + DECALAGE_RADAR) || !(mx < MARGE + DECALAGE_RADAR + (TAILLE_GRILLE * TAILLE_CASE)) || !(my >= MARGE) || !(my < MARGE + (TAILLE_GRILLE * TAILLE_CASE));
+    }
+
+    public static int radarYCellFromPixel(double y) {
+        return (int) ((y - MARGE) / TAILLE_CASE);
+    }
+
+    public static int radarXCellFromPixel(double x) {
+        return (int) ((x - (MARGE + DECALAGE_RADAR)) / TAILLE_CASE);
+    }
+
+    public static int oceanXCellFromPixel(double x) {
+        return (int) ((x + (TAILLE_CASE / 2.0) - MARGE) / TAILLE_CASE);
+    }
+
+    public static int oceanYCellFromPixel(double y) {
+        return (int) ((y + (TAILLE_CASE / 2.0) - MARGE) / TAILLE_CASE);
     }
 
     private record SystemeDeTir(GraphicsContext gc) {

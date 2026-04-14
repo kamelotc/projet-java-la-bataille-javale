@@ -1,32 +1,20 @@
 package school.coda.lucas.colomban.gui;
 
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
 import school.coda.lucas.colomban.modele.Bateau;
 import school.coda.lucas.colomban.modele.Grille;
 import school.coda.lucas.colomban.modele.Orientation;
 import school.coda.lucas.colomban.modele.TypeBateau;
 
 public class BateauGraphique {
-    TypeBateau type;
-    Orientation orientation = Orientation.HORIZONTAL;
-
-    public double x() {
-        return x;
-    }
-
-    public double y() {
-        return y;
-    }
-
-    double x;
-    double y;
-    double startX;
-    double startY;
-
-    public boolean estPlace() {
-        return estPlace;
-    }
-
-    boolean estPlace = false;
+    private final TypeBateau type;
+    private final double startX;
+    private final double startY;
+    private double x;
+    private double y;
+    private boolean estPlace = false;
+    private Orientation orientation = Orientation.HORIZONTAL;
 
     Bateau bateauLogique = null;
 
@@ -88,6 +76,15 @@ public class BateauGraphique {
         }
     }
 
+    public void dessiner(GraphicsContext gc, BateauGraphique bateauEnCoursDeDrag) {
+        gc.setLineWidth(1);
+        gc.setFill((this == bateauEnCoursDeDrag) ? Color.rgb(100, 100, 100, 0.7) : Color.GRAY);
+        double largeur = (orientation == Orientation.HORIZONTAL) ? type.getTaille() * GameBoard.TAILLE_CASE : GameBoard.TAILLE_CASE;
+        double hauteur = (orientation == Orientation.VERTICAL) ? type.getTaille() * GameBoard.TAILLE_CASE : GameBoard.TAILLE_CASE;
+        gc.fillRect(x, y, largeur, hauteur);
+        gc.strokeRect(x, y, largeur, hauteur);
+    }
+
 
     private void resetToInitialPosition() {
         this.x = startX;
@@ -99,4 +96,18 @@ public class BateauGraphique {
         this.x = x;
         this.y = y;
     }
+
+    public boolean nonPlace() {
+        return !estPlace;
+    }
+
+    public double x() {
+        return x;
+    }
+
+    public double y() {
+        return y;
+    }
+
+
 }

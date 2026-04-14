@@ -184,7 +184,7 @@ public class GameController {
         btnCombattre.setOnAction(_ -> {
             boolean tousPlaces = true;
             for (BateauGraphique b : flotte) {
-                if (!b.estPlace()) {
+                if (b.nonPlace()) {
                     tousPlaces = false;
                     break;
                 }
