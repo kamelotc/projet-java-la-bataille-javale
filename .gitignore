@@ -38,4 +38,8 @@ build/
 ### Mac OS ###
 .DS_Store
 
+# Local data
 bataille_javale.db
+
+# audit
+.repository-analysis/
