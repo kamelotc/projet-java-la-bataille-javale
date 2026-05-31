@@ -4,7 +4,6 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.VBox?>
-
 <VBox alignment="CENTER" prefHeight="800.0" prefWidth="800.0" spacing="20.0" xmlns:fx="http://javafx.com/fxml"
       fx:controller="school.coda.lucas.colomban.controller.MenuController"
       stylesheets="@style.css"
@@ -14,9 +13,9 @@
         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
     </padding>
 
-    <Label styleClass="titre-naval" text="LA BATAILLE JAVALE CRÉDITS" />
+    <Label styleClass="titre-naval" text="LA BATAILLE JAVALE CRÉDITS"/>
 
-    <Label styleClass="texte-naval" text="© Lucas et Colomban" />
+    <Label styleClass="texte-naval" text="© Lucas et Colomban"/>
 
     <Button text="Retour au Menu" onAction="#onRetourButtonClick"/>
 

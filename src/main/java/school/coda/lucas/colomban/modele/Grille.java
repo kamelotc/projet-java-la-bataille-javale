@@ -19,6 +19,7 @@ public class Grille {
         this.tirsRates = new boolean[TAILLE][TAILLE];
         this.tirsTouches = new boolean[TAILLE][TAILLE];
     }
+
     public String getDernierMessage() {
         return dernierMessage;
     }
@@ -108,7 +109,7 @@ public class Grille {
             return false;
         }
 
-        String coordonnees = (char)('A' + y) + "-" + (x + 1);
+        String coordonnees = (char) ('A' + y) + "-" + (x + 1);
 
         if (ocean[y][x] != null) {
             ocean[y][x].toucher();
@@ -137,6 +138,11 @@ public class Grille {
         return true;
     }
 
-    public boolean[][] getTirsRates() { return tirsRates; }
-    public boolean[][] getTirsTouches() { return tirsTouches; }
+    public boolean[][] getTirsRates() {
+        return tirsRates;
+    }
+
+    public boolean[][] getTirsTouches() {
+        return tirsTouches;
+    }
 }

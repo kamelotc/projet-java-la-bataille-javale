@@ -1,6 +1,7 @@
 package school.coda.lucas.colomban.succes;
 
 import school.coda.lucas.colomban.db.StatistiquesDb;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;

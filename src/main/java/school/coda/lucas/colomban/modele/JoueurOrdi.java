@@ -4,7 +4,7 @@ import java.util.Random;
 
 public class JoueurOrdi {
     private final Grille saGrille;
-    private final Random  random;
+    private final Random random;
 
     public JoueurOrdi() {
         this.saGrille = new Grille();

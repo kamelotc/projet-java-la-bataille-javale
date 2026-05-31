@@ -7,7 +7,7 @@
     -fx-font-family: 'Courier New', monospace;
     -fx-font-weight: bold;
     -fx-text-fill: #00ffcc;
-    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 10, 0, 0, 0);
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.8), 10, 0, 0, 0);
 }
 
 .texte-naval {
@@ -39,13 +39,14 @@
     -fx-opacity: 0.5;
     -fx-cursor: default;
 }
+
 .menu-fond {
     -fx-background-image: url('image/wow_ocean.jpg');
     -fx-background-size: cover;
     -fx-background-position: center center;
 }
 
-.menu-fond-sot{
+.menu-fond-sot {
     -fx-background-image: url('image/ocean_sot.jpg');
     -fx-background-size: cover;
     -fx-background-position: center center;

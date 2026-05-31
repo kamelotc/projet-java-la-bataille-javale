@@ -7,8 +7,8 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.stage.Stage;
-import school.coda.lucas.colomban.gui.LecteurAudio;
 import school.coda.lucas.colomban.Main;
+import school.coda.lucas.colomban.gui.LecteurAudio;
 
 import java.io.IOException;
 
