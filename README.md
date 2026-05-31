@@ -1,4 +1,5 @@
 # projet-java-la-bataille-javale
+
 # La Bataille Javale
 
 **La Bataille Javale**, une réinvention du jeu de société de la Bataille Navale, entièrement codée en Java.
@@ -15,10 +16,12 @@
 
 Le projet a été pensé avec une architecture modulaire et propre, séparant la logique métier de l'affichage :
 
-- **Modèle (`modele`) :** Gestion de la grille, des coordonnées, et de la logique des bateaux (`Bateau`, `Grille`, `TypeBateau`).
+- **Modèle (`modele`) :** Gestion de la grille, des coordonnées, et de la logique des bateaux (`Bateau`, `Grille`,
+  `TypeBateau`).
 - **Interface Graphique (`CanvasApplication`) :** Affichage de la grille interactive utilisant `Canvas` de JavaFX.
 - **Contrôleurs (`controller`) :** Les différentes scènes (Menu principal, Écran de fin, Écran des succès).
-- **Base de Données (`db`) :** Utilisation de SQLite via l'API JDBC. Les requêtes (`PreparedStatement`) sont centralisées dans une classe dédiée (`StatistiquesDb`).
+- **Base de Données (`db`) :** Utilisation de SQLite via l'API JDBC. Les requêtes (
+  `PreparedStatement`) sont centralisées dans une classe dédiée (`StatistiquesDb`).
 - **Succès (`succes`) :** Calcul et déblocage des trophées basés sur les données en base.
 
 ## Prérequis et Installation
